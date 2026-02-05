@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { SlideCard } from '@/components/slides/SlideCard'
+import { SlideListItem } from '@/components/slides/SlideListItem'
 import type { SlideMetadata } from '@/types'
 
 const mockSlide: SlideMetadata = {
@@ -11,14 +11,13 @@ const mockSlide: SlideMetadata = {
   description: 'Python入門者向けの基礎文法解説',
   tags: ['基礎', '入門'],
   author: 'hida-python',
-  thumbnail: '/thumbnails/2025-01-python-basics.png',
 }
 
-describe('SlideCard', () => {
+describe('SlideListItem', () => {
   it('should render slide title', () => {
     render(
       <BrowserRouter>
-        <SlideCard slide={mockSlide} />
+        <SlideListItem slide={mockSlide} />
       </BrowserRouter>
     )
 
@@ -28,7 +27,7 @@ describe('SlideCard', () => {
   it('should render slide description', () => {
     render(
       <BrowserRouter>
-        <SlideCard slide={mockSlide} />
+        <SlideListItem slide={mockSlide} />
       </BrowserRouter>
     )
 
@@ -38,7 +37,7 @@ describe('SlideCard', () => {
   it('should render all tags', () => {
     render(
       <BrowserRouter>
-        <SlideCard slide={mockSlide} />
+        <SlideListItem slide={mockSlide} />
       </BrowserRouter>
     )
 
@@ -49,7 +48,7 @@ describe('SlideCard', () => {
   it('should link to slide detail page', () => {
     render(
       <BrowserRouter>
-        <SlideCard slide={mockSlide} />
+        <SlideListItem slide={mockSlide} />
       </BrowserRouter>
     )
 
@@ -60,11 +59,10 @@ describe('SlideCard', () => {
   it('should display formatted date', () => {
     render(
       <BrowserRouter>
-        <SlideCard slide={mockSlide} />
+        <SlideListItem slide={mockSlide} />
       </BrowserRouter>
     )
 
-    // 日本語フォーマットの日付を確認
     expect(screen.getByText(/2025年1月15日/)).toBeInTheDocument()
   })
 })

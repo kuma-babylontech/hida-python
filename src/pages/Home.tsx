@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { SlideCard, TagFilter } from '@/components/slides'
+import { SlideListItem, TagFilter } from '@/components/slides'
 import { getAllSlides, getAllTags } from '@/utils'
 import type { SlideMetadata } from '@/types'
 
@@ -75,9 +75,9 @@ export function Home() {
 
       {/* スライド一覧 */}
       {filteredSlides.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-3">
           {filteredSlides.map((slide) => (
-            <SlideCard key={slide.id} slide={slide} />
+            <SlideListItem key={slide.id} slide={slide} />
           ))}
         </div>
       ) : (

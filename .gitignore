@@ -26,9 +26,6 @@ npm-debug.log*
 # Test coverage
 coverage/
 
-# Generated thumbnails (these will be generated in CI)
-public/thumbnails/*.png
-
 # Temporary files
 *.tmp
 *.temp

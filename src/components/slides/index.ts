@@ -1,2 +1,2 @@
-export { SlideCard } from './SlideCard'
+export { SlideListItem } from './SlideListItem'
 export { TagFilter } from './TagFilter'

@@ -83,7 +83,6 @@ export async function getAllSlides(): Promise<SlideMetadata[]> {
       description: (data.description as string) || '',
       tags: (data.tags as string[]) || [],
       author: data.author as string | undefined,
-      thumbnail: `/hida-python/thumbnails/${id}.png`,
     })
   }
 
@@ -109,7 +108,6 @@ export async function getSlide(id: string): Promise<SlideData | null> {
     description: (data.description as string) || '',
     tags: (data.tags as string[]) || [],
     author: data.author as string | undefined,
-    thumbnail: `/hida-python/thumbnails/${id}.png`,
     content: markdownContent,
   }
 }
