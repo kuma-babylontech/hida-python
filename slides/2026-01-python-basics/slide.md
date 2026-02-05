@@ -1,6 +1,6 @@
 ---
 title: "Pythonの基礎"
-date: 2025-01-15
+date: 2026-01-15
 description: "Python入門者向けの基礎文法解説。変数、データ型、制御構文について学びます。"
 tags:
   - 基礎
@@ -10,7 +10,7 @@ author: "hida-python"
 
 # Pythonの基礎
 
-飛騨高山Pythonの会 2025年1月
+飛騨高山Pythonの会 2026年1月
 
 ---
 

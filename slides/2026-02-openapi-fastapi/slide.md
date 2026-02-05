@@ -1,6 +1,6 @@
 ---
 title: "OpenAPI × FastAPI 入門"
-date: 2025-02-08
+date: 2026-02-08
 description: "APIの基礎からOpenAPI仕様、FastAPIの魅力まで。初心者向けにモダンなAPI開発スタイルをわかりやすく解説します。"
 tags:
   - FastAPI
@@ -12,7 +12,7 @@ tags:
 
 モダンなAPI開発のはじめかた
 
-飛騨高山Pythonの会 2025年2月
+飛騨高山Pythonの会 2026年2月
 
 ---
 
