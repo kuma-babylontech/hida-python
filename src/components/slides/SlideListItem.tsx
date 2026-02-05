@@ -40,9 +40,8 @@ export function SlideListItem({ slide }: SlideListItemProps) {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500 sm:flex-col sm:items-end sm:gap-1">
+        <div className="text-sm text-gray-500 dark:text-gray-500">
           <time dateTime={slide.date}>{formatDate(slide.date)}</time>
-          {slide.author && <span>{slide.author}</span>}
         </div>
       </div>
     </Link>
