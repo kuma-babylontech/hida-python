@@ -61,7 +61,15 @@ export function Home() {
           スライド一覧
         </h2>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          飛騨高山Pythonの会で発表したスライド資料
+          <a
+            href="https://hida-python.connpass.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+          >
+            飛騨高山Pythonの会
+          </a>
+          で発表したスライド資料
         </p>
       </div>
 
