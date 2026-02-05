@@ -13,6 +13,11 @@ declare module 'reveal.js' {
     progress?: boolean
     center?: boolean
     transition?: string
+    width?: number
+    height?: number
+    margin?: number
+    minScale?: number
+    maxScale?: number
     plugins?: unknown[]
   }
 
