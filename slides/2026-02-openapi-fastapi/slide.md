@@ -95,7 +95,7 @@ POST /api/users      → 新しいユーザーを作成
 APIの仕様を記述するための**標準フォーマット**
 
 - 旧称: Swagger Specification
-- 現在のバージョン: OpenAPI 3.1
+- 最新バージョン: OpenAPI 3.2（FastAPIは3.1対応）
 - YAML または JSON で記述
 
 ```yaml
@@ -180,7 +180,7 @@ def read_item(item_id: int, q: str | None = None):
 
 この型ヒントから自動的に：
 
-- `item_id` は整数（文字列が来たら400エラー）
+- `item_id` は整数（文字列が来たら422エラー）
 - `q` はオプションの文字列パラメータ
 - OpenAPIドキュメントが生成される
 
@@ -281,7 +281,8 @@ TypeScript クライアント (型付き！)
 
 ```dockerfile
 FROM python:3.12-slim
-COPY . /app
+WORKDIR /app
+COPY . .
 RUN pip install fastapi uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]
 ```
