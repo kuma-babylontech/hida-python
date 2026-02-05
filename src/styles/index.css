@@ -36,3 +36,26 @@ body {
 .reveal-container .reveal {
   @apply w-full h-full;
 }
+
+.reveal pre code {
+  max-height: 420px;
+  font-size: 0.55em;
+  line-height: 1.4;
+}
+
+.reveal .slides section {
+  padding: 20px 40px;
+}
+
+.reveal .slides h2 {
+  margin-bottom: 0.4em;
+}
+
+.reveal .slides table {
+  font-size: 0.7em;
+}
+
+.reveal .slides ul,
+.reveal .slides ol {
+  font-size: 0.85em;
+}
