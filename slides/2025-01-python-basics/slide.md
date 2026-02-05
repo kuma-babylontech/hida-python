@@ -10,7 +10,7 @@ author: "hida-python"
 
 # Pythonの基礎
 
-Python勉強会 2025年1月
+飛騨高山Pythonの会 2025年1月
 
 ---
 

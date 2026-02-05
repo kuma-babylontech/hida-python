@@ -11,7 +11,7 @@ author: "hida-python"
 # リスト内包表記と
 # ジェネレータ
 
-Python勉強会 2025年2月
+飛騨高山Pythonの会 2025年2月
 
 ---
 

@@ -14,7 +14,7 @@ export function Header() {
               hida-python
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Python勉強会スライド
+              飛騨高山Pythonの会スライド
             </p>
           </div>
         </Link>

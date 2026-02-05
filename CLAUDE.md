@@ -1,6 +1,6 @@
 # hida-python
 
-Python勉強会のスライド資料を管理・閲覧するためのWebアプリケーション。GitHub Pagesで公開。
+飛騨高山Pythonの会のスライド資料を管理・閲覧するためのWebアプリケーション。GitHub Pagesで公開。
 
 ## 技術スタック
 

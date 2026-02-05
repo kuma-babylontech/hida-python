@@ -61,7 +61,7 @@ export function Home() {
           スライド一覧
         </h2>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Python勉強会で発表したスライド資料
+          飛騨高山Pythonの会で発表したスライド資料
         </p>
       </div>
 
