@@ -1,0 +1,388 @@
+/*
+ * Custom reveal.js theme — Hida (飛騨)
+ *
+ * 和モダンの世界観に合わせた reveal.js テーマ。
+ * 深い墨色ベースに飛騨杉のアクセント、Shippori Mincho 見出し。
+ */
+
+section.has-dark-background,
+section.has-dark-background h1,
+section.has-dark-background h2,
+section.has-dark-background h3,
+section.has-dark-background h4,
+section.has-dark-background h5,
+section.has-dark-background h6 {
+  color: #e8e2d8;
+}
+
+/* ===========================
+   Global
+   =========================== */
+:root {
+  --r-background-color: #0c0c12;
+  --r-main-font: 'Zen Kaku Gothic New', sans-serif;
+  --r-main-font-size: 28px;
+  --r-main-color: #d4cfc4;
+  --r-heading-font: 'Shippori Mincho', serif;
+  --r-heading-color: #f0ebe0;
+  --r-heading-letter-spacing: 0.02em;
+  --r-heading-text-transform: none;
+  --r-heading-font-weight: 600;
+  --r-heading-line-height: 1.3;
+  --r-heading1-size: 2.2em;
+  --r-heading2-size: 1.5em;
+  --r-heading3-size: 1.15em;
+  --r-heading4-size: 1.0em;
+  --r-code-font: 'JetBrains Mono', monospace;
+  --r-link-color: #7db8da;
+  --r-link-color-dark: #5a9fc4;
+  --r-link-color-hover: #FFD43B;
+  --r-selection-background-color: rgba(48, 105, 152, 0.35);
+  --r-selection-color: #fff;
+  --r-overlay-element-bg-color: rgba(10, 10, 15, 0.85);
+  --r-overlay-element-fg-color: #d4cfc4;
+}
+
+.reveal-viewport {
+  background: var(--r-background-color);
+  background-image:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(48, 105, 152, 0.06), transparent),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(139, 105, 20, 0.04), transparent);
+}
+
+.reveal {
+  font-family: var(--r-main-font);
+  font-size: var(--r-main-font-size);
+  font-weight: 400;
+  color: var(--r-main-color);
+}
+
+::selection {
+  color: var(--r-selection-color);
+  background: var(--r-selection-background-color);
+  text-shadow: none;
+}
+
+.reveal .slides section,
+.reveal .slides section > section {
+  line-height: 1.6;
+  font-weight: inherit;
+}
+
+/* ===========================
+   Headings
+   =========================== */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 20px 0;
+  color: var(--r-heading-color);
+  font-family: var(--r-heading-font);
+  font-weight: var(--r-heading-font-weight);
+  line-height: var(--r-heading-line-height);
+  letter-spacing: var(--r-heading-letter-spacing);
+  text-transform: var(--r-heading-text-transform);
+  text-shadow: none;
+  word-wrap: break-word;
+}
+
+.reveal h1 {
+  font-size: var(--r-heading1-size);
+  font-weight: 800;
+}
+
+.reveal h2 {
+  font-size: var(--r-heading2-size);
+}
+
+.reveal h3 {
+  font-size: var(--r-heading3-size);
+}
+
+.reveal h4 {
+  font-size: var(--r-heading4-size);
+}
+
+/* h1 にアクセントライン */
+.reveal h1::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, #306998, #FFD43B);
+  border-radius: 1px;
+}
+
+/* h2 に左ボーダーアクセント */
+.reveal .slides section h2 {
+  text-align: left;
+  padding-left: 16px;
+  border-left: 3px solid #C4A35A;
+}
+
+/* セクション区切り（内容なし h2 の次のスライドは中央寄せ） */
+.reveal .slides section h2:only-child {
+  text-align: center;
+  padding-left: 0;
+  border-left: none;
+}
+
+/* ===========================
+   Text & paragraphs
+   =========================== */
+.reveal p {
+  margin: 16px 0;
+  line-height: 1.7;
+}
+
+.reveal strong,
+.reveal b {
+  color: #FFD43B;
+  font-weight: 700;
+}
+
+.reveal em,
+.reveal i {
+  color: #7db8da;
+}
+
+.reveal small {
+  font-size: 0.7em;
+  color: rgba(212, 207, 196, 0.6);
+}
+
+/* ===========================
+   Links
+   =========================== */
+.reveal a {
+  color: var(--r-link-color);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(125, 184, 218, 0.3);
+  transition: all 0.3s ease;
+}
+
+.reveal a:hover {
+  color: var(--r-link-color-hover);
+  border-bottom-color: rgba(255, 212, 59, 0.5);
+  text-shadow: none;
+}
+
+/* ===========================
+   Lists
+   =========================== */
+.reveal ul,
+.reveal ol {
+  display: block;
+  text-align: left;
+  margin: 0 0 0 1em;
+}
+
+.reveal ul {
+  list-style-type: none;
+}
+
+.reveal ul li {
+  position: relative;
+  padding-left: 1em;
+  margin-bottom: 0.4em;
+}
+
+.reveal ul li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: #C4A35A;
+  font-weight: 700;
+}
+
+.reveal ol li {
+  margin-bottom: 0.4em;
+}
+
+.reveal ul ul,
+.reveal ul ol,
+.reveal ol ol,
+.reveal ol ul {
+  margin-top: 0.3em;
+  font-size: 0.9em;
+}
+
+/* ===========================
+   Code
+   =========================== */
+.reveal pre {
+  display: block;
+  position: relative;
+  text-align: left;
+  font-size: 0.52em;
+  font-family: var(--r-code-font);
+  line-height: 1.5;
+  word-wrap: break-word;
+  border: 1px solid rgba(196, 163, 90, 0.12);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: none;
+}
+
+.reveal code {
+  font-family: var(--r-code-font);
+  text-transform: none;
+  tab-size: 2;
+}
+
+.reveal pre code {
+  display: block;
+  padding: 16px 20px;
+  overflow: auto;
+  max-height: 420px;
+  word-wrap: normal;
+}
+
+/* inline code */
+.reveal p code,
+.reveal li code,
+.reveal td code {
+  background: rgba(196, 163, 90, 0.1);
+  border: 1px solid rgba(196, 163, 90, 0.15);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+  color: #e8c86a;
+}
+
+/* ===========================
+   Tables
+   =========================== */
+.reveal table {
+  margin: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.7em;
+}
+
+.reveal table th {
+  font-weight: 600;
+  color: var(--r-heading-color);
+  background: rgba(48, 105, 152, 0.12);
+  border-bottom: 2px solid rgba(196, 163, 90, 0.25);
+}
+
+.reveal table th,
+.reveal table td {
+  text-align: left;
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.reveal table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.reveal table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ===========================
+   Blockquote
+   =========================== */
+.reveal blockquote {
+  display: block;
+  position: relative;
+  margin: 20px auto;
+  padding: 12px 24px;
+  font-style: italic;
+  background: rgba(196, 163, 90, 0.06);
+  border-left: 3px solid #C4A35A;
+  border-radius: 0 4px 4px 0;
+  box-shadow: none;
+  color: rgba(212, 207, 196, 0.85);
+}
+
+/* ===========================
+   Images
+   =========================== */
+.reveal section img {
+  margin: 15px 0;
+  border: none;
+  box-shadow: none;
+  border-radius: 4px;
+  max-height: 50vh;
+}
+
+.reveal section img.plain {
+  border: 0;
+  box-shadow: none;
+}
+
+/* ===========================
+   Controls & Progress
+   =========================== */
+.reveal .controls {
+  color: #C4A35A;
+}
+
+.reveal .controls button {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.reveal .controls button:hover {
+  opacity: 0.9;
+}
+
+.reveal .progress {
+  height: 2px;
+  background: rgba(196, 163, 90, 0.1);
+}
+
+.reveal .progress span {
+  background: linear-gradient(90deg, #306998, #C4A35A);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===========================
+   Slide number
+   =========================== */
+.reveal .slide-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(196, 163, 90, 0.4);
+  background: transparent;
+  right: 16px;
+  bottom: 12px;
+}
+
+/* ===========================
+   Fragment animations
+   =========================== */
+.reveal .slides section .fragment {
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal .slides section .fragment.visible {
+  opacity: 1;
+}
+
+.reveal .slides section .fragment.fade-up {
+  transform: translateY(20px);
+}
+
+.reveal .slides section .fragment.fade-up.visible {
+  transform: translateY(0);
+}
+
+/* ===========================
+   Print / PDF export
+   =========================== */
+@media print {
+  .reveal .slides section {
+    background: #fff !important;
+    color: #222 !important;
+  }
+}
