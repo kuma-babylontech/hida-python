@@ -1,0 +1,71 @@
+{
+  "version": "0.2",
+  "minWordLength": 3,
+  "maxDuplicateProblems": 5,
+  "languageSettings": [
+    {
+      "languageId": "*",
+      "locale": "en,en-US,ja,ja-JP,lorem,lorem-ipsum",
+      "dictionaries": [
+        "lorem-ipsum"
+      ]
+    },
+    {
+      "languageId": "python",
+      "dictionaries": ["python"]
+    },
+    {
+      "languageId": "typescript,javascript,typescriptreact,javascriptreact",
+      "dictionaries": ["typescript", "node", "npm"]
+    },
+    {
+      "languageId": "java",
+      "dictionaries": ["java"]
+    },
+    {
+      "languageId": "shellscript,sh,bash",
+      "dictionaries": ["bash"]
+    },
+    {
+      "languageId": "dockerfile",
+      "dictionaries": ["docker"]
+    }
+  ],
+  "words": [],
+  "ignorePaths": [
+    "node_modules/**",
+    "**/pnpm-lock.yaml",
+    "**/package-lock.json",
+    ".git/**",
+    "*.log",
+    "dist/**",
+    "build/**",
+    ".github/workflows/*.yml",
+    ".textlintrc.json",
+    "cspell.json",
+    "**/*.svg",
+    "**/*.drawio",
+    "**/.gradle/**",
+    "**/bin/**",
+    "**/*.jar",
+    "**/*.gen.ts",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    ".pytest_cache/**",
+    ".ruff_cache/**",
+    "**/*.pdf",
+    "**/*.lock",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/.env",
+    "**/.env.*",
+    "**/*.min.js",
+    "**/*.min.css",
+    "**/coverage/**",
+    "**/.DS_Store"
+  ],
+  "allowCompoundWords": true,
+  "ignoreRegExpList": [
+    "/[ぁ-んァ-ヶｱ-ﾝﾞﾟ一-龠０-９々〆〤]+/g"
+  ]
+}

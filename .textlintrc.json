@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "preset-ja-technical-writing": {
+      "max-kanji-continuous-len": {
+        "max": 9
+      }
+    },
+    "preset-ja-spacing": true,
+    "ja-no-mixed-period": {
+      "allowPeriodMarks": [":", "："],
+      "forceAppendPeriod": false
+    },
+    "ja-no-successive-word": true,
+    "no-mix-dearu-desumasu": {
+      "preferInHeader": "",
+      "preferInBody": "",
+      "preferInList": "である",
+      "strict": false
+    },
+    "period-in-list-item": false,
+    "@textlint-ja/no-synonyms": true,
+    "@textlint-ja/textlint-rule-no-dropping-i": true,
+    "@textlint-ja/preset-ai-writing": true,
+    "prh": {
+      "rulePaths": [".textlint/prh.yml"]
+    }
+  },
+  "filters": {
+    "comments": true
+  }
+}

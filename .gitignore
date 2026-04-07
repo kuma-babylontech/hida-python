@@ -32,3 +32,10 @@ coverage/
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+
+# Demo output (generated images)
+demo/*/output/

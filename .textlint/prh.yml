@@ -1,0 +1,23 @@
+version: 1
+rules:
+  - expected: GitHub
+    patterns:
+      - Github
+      - github
+  - expected: Markdown
+    patterns:
+      - markdown
+      - MarkDown
+  - expected: Pull Request
+    patterns:
+      - pull request
+      - pullrequest
+      - Pull request
+  - expected: TypeScript
+    patterns:
+      - typescript
+      - Typescript
+  - expected: JavaScript
+    patterns:
+      - javascript
+      - Javascript
