@@ -101,6 +101,13 @@ export async function getSlide(id: string): Promise<SlideData | null> {
   const content = await slideModules[path]()
   const { data, content: markdownContent } = parseFrontmatter(content)
 
+  // 画像の相対パスを public/ 配下の絶対パスに変換
+  const base = import.meta.env.BASE_URL
+  const resolvedContent = markdownContent.replace(
+    /!\[([^\]]*)\]\(assets\//g,
+    `![$1](${base}slides/${id}/assets/`
+  )
+
   return {
     id,
     title: (data.title as string) || 'Untitled',
@@ -108,7 +115,7 @@ export async function getSlide(id: string): Promise<SlideData | null> {
     description: (data.description as string) || '',
     tags: (data.tags as string[]) || [],
     author: data.author as string | undefined,
-    content: markdownContent,
+    content: resolvedContent,
   }
 }
 
