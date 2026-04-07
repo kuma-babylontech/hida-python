@@ -44,77 +44,120 @@ export function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600 mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400">読み込み中...</p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative h-10 w-10">
+            <div className="absolute inset-0 rounded-full border border-python-yellow/30 animate-ping" />
+            <div className="absolute inset-2 rounded-full border border-python-blue/50 animate-pulse" />
+            <div className="absolute inset-[14px] accent-dot" />
+          </div>
+          <p className="text-xs tracking-widest text-gray-600 uppercase" style={{ fontFamily: 'var(--font-mono)' }}>
+            loading
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* ヘッダー */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-          スライド一覧
-        </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+    <div className="mx-auto max-w-6xl px-6">
+      {/* Hero */}
+      <div className="hero-gradient pt-16 pb-12 sm:pt-24 sm:pb-16">
+        <div className="animate-slide-up">
+          <p
+            className="text-xs tracking-[0.3em] uppercase text-hida-cedar-light mb-4"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            Hida Takayama Python Meetup
+          </p>
+          <h1
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-100 leading-tight"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 800 }}
+          >
+            飛騨高山
+            <br />
+            <span className="text-python-blue">Python</span>
+            <span className="text-gray-500">の会</span>
+          </h1>
+        </div>
+
+        <div className="animate-slide-up mt-6" style={{ animationDelay: '0.1s' }}>
+          <div className="animate-draw-line section-line max-w-xs" style={{ animationDelay: '0.4s' }} />
+        </div>
+
+        <div className="animate-slide-up mt-6 max-w-lg" style={{ animationDelay: '0.2s' }}>
+          <p className="text-sm leading-relaxed text-gray-500">
+            勉強会で発表したスライド資料のアーカイブ。
+            <br className="hidden sm:block" />
+            Pythonを中心に、Web開発・データ分析・AI活用まで。
+          </p>
+        </div>
+
+        <div className="animate-slide-up mt-8 flex items-center gap-4" style={{ animationDelay: '0.3s' }}>
           <a
             href="https://hida-python.connpass.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+            className="inline-flex items-center gap-2 rounded-full border border-python-yellow/30 bg-python-yellow/5 px-5 py-2.5 text-xs font-medium tracking-wider text-python-yellow hover:bg-python-yellow/10 hover:border-python-yellow/50 transition-all"
+            style={{ fontFamily: 'var(--font-mono)' }}
           >
-            飛騨高山Pythonの会
+            <span className="accent-dot" style={{ width: 4, height: 4 }} />
+            Connpass
           </a>
-          で発表したスライド資料
-        </p>
+          <span className="text-gray-700 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+            {slides.length} slides
+          </span>
+        </div>
       </div>
 
-      {/* タグフィルター */}
-      <TagFilter
-        tags={tags}
-        selectedTags={selectedTags}
-        onTagToggle={handleTagToggle}
-        onClearAll={handleClearTags}
-      />
+      {/* Filter + List */}
+      <div className="pb-16">
+        <div className="animate-slide-up" style={{ animationDelay: '0.35s' }}>
+          <TagFilter
+            tags={tags}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            onClearAll={handleClearTags}
+          />
+        </div>
 
-      {/* スライド一覧 */}
-      {filteredSlides.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          {filteredSlides.map((slide) => (
-            <SlideListItem key={slide.id} slide={slide} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-lg border-2 border-dashed border-gray-200 p-12 text-center dark:border-gray-800">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-            <svg
-              className="h-8 w-8 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+        {filteredSlides.length > 0 ? (
+          <div className="flex flex-col gap-1">
+            {filteredSlides.map((slide, index) => (
+              <div
+                key={slide.id}
+                className="animate-slide-up"
+                style={{ animationDelay: `${0.4 + index * 0.08}s` }}
+              >
+                <SlideListItem slide={slide} />
+              </div>
+            ))}
           </div>
-          <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-            スライドがありません
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {selectedTags.length > 0
-              ? '選択したタグに一致するスライドがありません'
-              : 'slides/ ディレクトリにスライドを追加してください'}
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className="animate-fade-in mt-12 text-center py-16">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-white/10 mb-4">
+              <svg
+                className="h-5 w-5 text-gray-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <p className="text-sm text-gray-600">
+              {selectedTags.length > 0
+                ? '一致するスライドがありません'
+                : 'スライドがまだありません'}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

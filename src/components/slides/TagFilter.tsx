@@ -9,36 +9,34 @@ export function TagFilter({ tags, selectedTags, onTagToggle, onClearAll }: TagFi
   if (tags.length === 0) return null
 
   return (
-    <div className="mb-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          タグで絞り込み:
-        </span>
-        {tags.map((tag) => {
-          const isSelected = selectedTags.includes(tag)
-          return (
-            <button
-              key={tag}
-              onClick={() => onTagToggle(tag)}
-              className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-                isSelected
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-              }`}
-            >
-              {tag}
-            </button>
-          )
-        })}
-        {selectedTags.length > 0 && (
+    <div className="mb-6 flex flex-wrap items-center gap-2 py-4 border-b border-white/5">
+      <span
+        className="text-[10px] tracking-[0.2em] uppercase text-gray-600 mr-2"
+        style={{ fontFamily: 'var(--font-mono)' }}
+      >
+        filter
+      </span>
+      {tags.map((tag) => {
+        const isSelected = selectedTags.includes(tag)
+        return (
           <button
-            onClick={onClearAll}
-            className="text-sm text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            key={tag}
+            onClick={() => onTagToggle(tag)}
+            className={`tag-pill rounded-sm px-2.5 py-1 cursor-pointer ${isSelected ? 'active' : ''}`}
           >
-            クリア
+            {tag}
           </button>
-        )}
-      </div>
+        )
+      })}
+      {selectedTags.length > 0 && (
+        <button
+          onClick={onClearAll}
+          className="text-[10px] tracking-wider text-gray-600 hover:text-gray-400 transition-colors ml-2 cursor-pointer"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          clear
+        </button>
+      )}
     </div>
   )
 }
