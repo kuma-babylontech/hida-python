@@ -47,15 +47,26 @@ author: "kuma"
 
 --
 
-### 「勘」で選んでいませんか？
+### 発表者の個人的な動機
 
-- 不動産屋に勧められるまま購入
-- 「駅近だから大丈夫」という思い込み
-- 利回りの数字だけを見て判断
+- 実は私、不動産投資をしています
+- でも正直、物件選びは **「勘」と「営業トーク」頼み**
+- 統計はほぼ初心者 — 数字で語れるようになりたい
+
+→ せっかくなので勉強過程を勉強会のネタにしました
 
 --
 
-### データで判断できること
+### なぜこの題材がPython学習に向くか
+
+- **公開API** があり誰でも同じデータで試せる（国交省）
+- 価格・面積・築年数など **数値と categorical が混在**
+- pandas / matplotlib / seaborn の練習にちょうどいい粒度
+- 不動産に興味がなくても **EDAの型** は他分野に応用できる
+
+--
+
+### データで答えたい問い（発表者の関心）
 
 - このエリアの **相場** はいくら？
 - 築年数で価格は **どれくらい下がる**？
@@ -97,7 +108,16 @@ resp = requests.get(API_URL, headers={
 data = resp.json()
 ```
 
-API キー申請: 約5営業日（無料）
+--
+
+### ⚠ 今回は API キーが間に合いませんでした
+
+- 申請済みだが **発行待ち**（約5営業日かかる）
+- なので今日は **API をモック** してデモします
+- `unittest.mock` で `requests.get` を差し替え
+- レスポンスは本物の仕様に合わせた **サンプルデータ（500件）**
+
+→ キーが届いたら同じコードが本番 API にそのまま通る設計
 
 --
 
@@ -114,6 +134,77 @@ API レスポンスと同じ形式のサンプルデータ（500件）
 | NearestStation | 最寄り駅 |
 | TimeToNearestStation | 駅徒歩（分） |
 
+--
+
+### コード解説① モックへの差し替え
+
+```python
+from unittest.mock import patch
+
+def main():
+    if USE_MOCK:
+        ctx = patch("requests.get", side_effect=_mock_api_response)
+    else:
+        ctx = nullcontext()
+
+    with ctx:
+        df = fetch_transactions(2025, 1)
+```
+
+- `patch("requests.get", ...)` で **関数自体を差し替え**
+- `side_effect` に関数を渡すと、呼び出しごとに **引数を受け取って動的にレスポンス生成**
+- `with` を抜けると元に戻る → 本番コードに副作用なし
+
+--
+
+### コード解説② 本物そっくりのレスポンス
+
+```python
+def _mock_api_response(*args, **kwargs):
+    params = kwargs.get("params", {})
+    target = f"{params['year']}年第{params['quarter']}四半期"
+    records = [r for r in _load_sample_records()
+               if r["Period"] == target]
+
+    mock_resp = MagicMock(spec=requests.Response)
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {"status": "OK", "data": records}
+    mock_resp.raise_for_status.return_value = None
+    return mock_resp
+```
+
+- `spec=requests.Response` で **本物の Response と同じ属性** しか許可しない
+  → typo で `mock_resp.jsno()` のような事故を防げる
+- `params` を読んで **クエリに応じたデータを返す** = API の挙動を再現
+
+--
+
+### コード解説③ モック／本番の切り替え
+
+```python
+API_KEY = os.environ.get("REINFOLIB_API_KEY", "")
+USE_MOCK = not API_KEY
+```
+
+- 環境変数があれば本番、なければモック
+- **`fetch_transactions` 自体は 1 行も変わらない**
+- キーが届いたら `export REINFOLIB_API_KEY=...` するだけ
+
+→ **テスト容易性** と **本番コードの単純さ** を両立するパターン
+
+--
+
+### なぜ mock を使うのか
+
+| もし mock を使わなかったら | mock を使うと |
+|---|---|
+| キー待ちで開発が止まる | **今日から書ける** |
+| テスト実行に外部 API が必要 | **オフラインで完結** |
+| API の障害でテストが落ちる | **安定した CI** |
+| 課金・レート制限の心配 | **無料・無制限** |
+
+外部 API を叩くコードを書くときの **定石** として覚えておきたい
+
 ---
 
 ## 記述統計
@@ -128,7 +219,7 @@ API レスポンスと同じ形式のサンプルデータ（500件）
 import pandas as pd
 
 df = pd.read_csv("tokyo_mansion.csv")
-df["BuildingAge"] = 2025 - df["BuildingYear"]
+df["BuildingAge"] = 2025 - df["BuildingYear"].str.replace("年", "").astype(int)
 df["PriceMan"] = df["TradePrice"] / 10000
 
 df[["PriceMan", "Area", "BuildingAge"]].describe()
@@ -148,6 +239,43 @@ max       3349.8    30.0       40.0
 
 --
 
+### コード解説① 派生カラムの作り方
+
+```python
+df["BuildingAge"] = 2025 - df["BuildingYear"].str.replace("年", "").astype(int)
+df["PriceMan"]    = df["TradePrice"] / 10000
+```
+
+- **`df["新しい名前"] = ...`** で列を追加（破壊的）
+- `BuildingYear` は `"1995年"` のような **文字列** で入っている
+  → `.str.replace("年", "")` で年を除去 → `.astype(int)` で数値化
+- pandas の **ベクトル化演算**: `2025 - Series` が全行に一括適用（for ループ不要）
+- `TradePrice / 10000` で 円 → 万円。単位を揃えると **describe の結果が読みやすい**
+
+→ 分析前の **前処理（クレンジング）** が EDA の 8 割
+
+--
+
+### コード解説② describe() の読み方
+
+```python
+df[["PriceMan", "Area", "BuildingAge"]].describe()
+```
+
+- `df[["列A", "列B"]]` で **複数列を選択**（リストの中にリスト）
+- `.describe()` は数値列に対し **8 つの統計量を一発で計算**
+
+| 行 | 意味 | 見るポイント |
+|---|---|---|
+| count | 件数 | 欠損がないか |
+| mean / std | 平均・標準偏差 | バラつきの規模感 |
+| min / max | 最小・最大 | 外れ値の気配 |
+| 25% / 50% / 75% | 四分位 | **50% が中央値**、箱ひげ図の箱 |
+
+→ 数値列をまとめて選択して describe、が **最初の一手** の定型
+
+--
+
 ### 平均 vs 中央値
 
 ```
@@ -163,6 +291,25 @@ max       3349.8    30.0       40.0
 
 --
 
+### コード解説③ mean() と median()
+
+```python
+mean_price   = df["PriceMan"].mean()
+median_price = df["PriceMan"].median()
+print(f"  平均:   {mean_price:,.0f} 万円")
+print(f"  差:     {mean_price - median_price:+,.0f} 万円")
+```
+
+- `df["列名"]` は **Series**（1 列分の配列）
+- Series に `.mean()` / `.median()` / `.std()` など統計メソッドが生えている
+- f-string の **フォーマット指定子**:
+  - `:,.0f` → 3 桁区切り + 小数点以下 0 桁（例: `1,300`）
+  - `:+,.0f` → 符号付き（例: `+131`）
+
+→ **print デバッグの見やすさ** は分析のスピードに直結
+
+--
+
 ### 標準偏差 = バラつき = リスク
 
 ```
@@ -175,6 +322,42 @@ max       3349.8    30.0       40.0
 
 - 板橋区: 価格が安定 → リスク低め
 - 中野区: 同じ区でも価格差が大きい → 物件選びが重要
+
+--
+
+### コード解説④ groupby で一気に集計
+
+```python
+area_std = (
+    df.groupby("Municipality")["PriceMan"]
+      .agg(["std", "median"])
+      .sort_values("std", ascending=False)
+)
+area_std["変動係数"] = (area_std["std"] / area_std["median"] * 100).round(1)
+```
+
+- `groupby("Municipality")` → 市区町村ごとに **グループ分け**
+- `["PriceMan"]` で対象列を絞る
+- `.agg(["std", "median"])` で **複数の統計量をまとめて計算**
+- 結果は「Municipality を index に持つ DataFrame」になる
+- 新しい列 `変動係数` は **既存列同士の演算** で作れる（ベクトル化）
+
+→ **SQL で言えば `GROUP BY + 複数集計`** を 1 行で書けるのが pandas の強み
+
+--
+
+### コード解説⑤ なぜ変動係数を使うのか
+
+```python
+area_std["変動係数"] = area_std["std"] / area_std["median"] * 100
+```
+
+- 標準偏差 **だけ** を見ると高いエリアほど大きく出る
+  - 例: 港区の std は板橋区より大きいのは当然（価格の絶対額が違う）
+- **標準偏差 ÷ 中央値** で割ると **スケールの影響を消せる**
+- → 異なるエリアの **バラつきを公平に比較** できる
+
+これが「**数字を割って無次元化する**」という統計の基本テクニック
 
 ---
 
