@@ -136,28 +136,38 @@ API レスポンスと同じ形式のサンプルデータ（500件）
 
 --
 
-### コード解説① モックへの差し替え
+### そもそも「モック」って何？
+
+**モック = 本物のふりをするニセモノ**
+
+- 映画の撮影で使う「小道具の電話」みたいなもの
+- 見た目や使い方は本物と同じ
+- でも中身は自分で作った簡単なもの
+
+今回は「ネットにつないでデータを取ってくる関数」の
+ふりをしてくれるニセモノを作ります
+
+--
+
+### コード解説① 本物の代わりにニセモノを使う
 
 ```python
 from unittest.mock import patch
 
-def main():
-    if USE_MOCK:
-        ctx = patch("requests.get", side_effect=_mock_api_response)
-    else:
-        ctx = nullcontext()
-
-    with ctx:
-        df = fetch_transactions(2025, 1)
+with patch("requests.get", side_effect=_mock_api_response):
+    df = fetch_transactions(2025, 1)
 ```
 
-- `patch("requests.get", ...)` で **関数自体を差し替え**
-- `side_effect` に関数を渡すと、呼び出しごとに **引数を受け取って動的にレスポンス生成**
-- `with` を抜けると元に戻る → 本番コードに副作用なし
+- `requests.get` = 本来ネットにアクセスする関数
+- `patch("requests.get", ...)` = その関数を **一時的に別物に入れ替える**
+- `side_effect=_mock_api_response` = 「呼ばれたらこの自作関数を動かしてね」
+- `with` ブロックの中だけ入れ替わり、外に出ると元通り
+
+→ **本物の API を呼ばずに、同じコードでテストできる**
 
 --
 
-### コード解説② 本物そっくりのレスポンス
+### コード解説② ニセモノの中身を作る
 
 ```python
 def _mock_api_response(*args, **kwargs):
@@ -165,45 +175,66 @@ def _mock_api_response(*args, **kwargs):
     target = f"{params['year']}年第{params['quarter']}四半期"
     records = [r for r in _load_sample_records()
                if r["Period"] == target]
-
-    mock_resp = MagicMock(spec=requests.Response)
-    mock_resp.status_code = 200
-    mock_resp.json.return_value = {"status": "OK", "data": records}
-    mock_resp.raise_for_status.return_value = None
-    return mock_resp
+    ...
 ```
 
-- `spec=requests.Response` で **本物の Response と同じ属性** しか許可しない
-  → typo で `mock_resp.jsno()` のような事故を防げる
-- `params` を読んで **クエリに応じたデータを返す** = API の挙動を再現
+- `kwargs` = 呼び出し側が渡してきた引数（辞書の形）
+- そこから `year` と `quarter` を取り出す
+- サンプルデータの中から **その期間に合うものだけ** を選ぶ
+- リスト内包表記: `[x for x in リスト if 条件]` は
+  「条件に合うものを集めた新しいリストを作る」という意味
+
+→ 本物の API と同じ「期間を指定するとその期間のデータが返る」動きを再現
 
 --
 
-### コード解説③ モック／本番の切り替え
+### コード解説③ ニセモノのレスポンスを組み立てる
+
+```python
+mock_resp = MagicMock(spec=requests.Response)
+mock_resp.status_code = 200
+mock_resp.json.return_value = {"status": "OK", "data": records}
+return mock_resp
+```
+
+- `MagicMock` = **どんなメソッドも持ってる便利なニセモノ**
+- `spec=requests.Response` =「本物と同じ形に揃えて」というお願い
+- `status_code = 200` → 「成功しましたよ」という意味
+- `json.return_value = ...` → 「`.json()` が呼ばれたらこの辞書を返してね」
+- 本物のレスポンスは `{"status": "OK", "data": [...]}` という形なのでそれに合わせる
+
+--
+
+### コード解説④ 本番とテストを切り替える
 
 ```python
 API_KEY = os.environ.get("REINFOLIB_API_KEY", "")
 USE_MOCK = not API_KEY
 ```
 
-- 環境変数があれば本番、なければモック
-- **`fetch_transactions` 自体は 1 行も変わらない**
-- キーが届いたら `export REINFOLIB_API_KEY=...` するだけ
+- `os.environ.get(...)` = パソコンの環境変数を読む
+- キーがあれば本番、なければ自動でモック
+- **`fetch_transactions` の中身は 1 行も変えなくていい**
+- キーが届いたらターミナルで
 
-→ **テスト容易性** と **本番コードの単純さ** を両立するパターン
+  ```bash
+  export REINFOLIB_API_KEY=xxxxxxx
+  ```
+
+  とするだけで本物の API に切り替わる
 
 --
 
-### なぜ mock を使うのか
+### なぜわざわざモックを使うの？
 
-| もし mock を使わなかったら | mock を使うと |
+| もしモックがなかったら | モックがあると |
 |---|---|
-| キー待ちで開発が止まる | **今日から書ける** |
-| テスト実行に外部 API が必要 | **オフラインで完結** |
-| API の障害でテストが落ちる | **安定した CI** |
-| 課金・レート制限の心配 | **無料・無制限** |
+| API キーが届くまで何もできない | **今日から書ける** |
+| ネットがないと動かない | **オフラインでも動く** |
+| API が壊れたらテストも落ちる | **安定して動く** |
+| 使いすぎると料金やエラーが心配 | **何回でも無料** |
 
-外部 API を叩くコードを書くときの **定石** として覚えておきたい
+→ 外部サービスを使うコードを書くときの **お決まりのやり方**
 
 ---
 
@@ -239,40 +270,64 @@ max       3349.8    30.0       40.0
 
 --
 
-### コード解説① 派生カラムの作り方
+### そもそも DataFrame って何？
+
+**DataFrame = Excel の表みたいなもの**
+
+```
+    TradePrice  BuildingYear  Municipality
+0   15,000,000      1995年        新宿区
+1   22,000,000      2010年        港区
+2   ...
+```
+
+- 横が「行」（1 物件 = 1 行）
+- 縦が「列」（価格、築年など項目ごと）
+- pandas はこの表を Python から簡単に触れるライブラリ
+
+--
+
+### コード解説① 新しい列を作る
 
 ```python
 df["BuildingAge"] = 2025 - df["BuildingYear"].str.replace("年", "").astype(int)
 df["PriceMan"]    = df["TradePrice"] / 10000
 ```
 
-- **`df["新しい名前"] = ...`** で列を追加（破壊的）
-- `BuildingYear` は `"1995年"` のような **文字列** で入っている
-  → `.str.replace("年", "")` で年を除去 → `.astype(int)` で数値化
-- pandas の **ベクトル化演算**: `2025 - Series` が全行に一括適用（for ループ不要）
-- `TradePrice / 10000` で 円 → 万円。単位を揃えると **describe の結果が読みやすい**
+やっていること:
 
-→ 分析前の **前処理（クレンジング）** が EDA の 8 割
+1. `BuildingYear` は `"1995年"` のような **文字** なので計算できない
+2. `.str.replace("年", "")` で `"年"` を消して `"1995"` にする
+3. `.astype(int)` で文字を数字に変換 → `1995`
+4. `2025 - 1995` で築年数が出る
+
+ポイント:
+
+- `df["新しい名前"] = ...` と書くと **列がまるごと 1 本追加される**
+- `for` ループを書かなくても **全行まとめて計算** してくれる（pandas の魔法）
+- 円は桁が大きいので `/ 10000` で万円に直すと読みやすい
 
 --
 
-### コード解説② describe() の読み方
+### コード解説② describe() は最初のごあいさつ
 
 ```python
 df[["PriceMan", "Area", "BuildingAge"]].describe()
 ```
 
-- `df[["列A", "列B"]]` で **複数列を選択**（リストの中にリスト）
-- `.describe()` は数値列に対し **8 つの統計量を一発で計算**
+- `df[["列A", "列B"]]` = **見たい列だけを選ぶ**
+  （カッコが 2 重なのは「リストを渡してる」から）
+- `.describe()` = 選んだ列について **8 つの数字をまとめて教えてくれる**
 
-| 行 | 意味 | 見るポイント |
+| 行 | 何の数字？ | どう見る？ |
 |---|---|---|
-| count | 件数 | 欠損がないか |
-| mean / std | 平均・標準偏差 | バラつきの規模感 |
-| min / max | 最小・最大 | 外れ値の気配 |
-| 25% / 50% / 75% | 四分位 | **50% が中央値**、箱ひげ図の箱 |
+| count | 件数 | データが何件あるか |
+| mean | 平均 | だいたいの真ん中 |
+| std | バラつき | 数字がどれくらい散らばっているか |
+| min / max | 最小・最大 | 一番安い / 高い物件 |
+| 25% / 50% / 75% | 順番に並べた時の区切り | **50% が中央値** |
 
-→ 数値列をまとめて選択して describe、が **最初の一手** の定型
+→ 新しいデータを見るときは **まず describe() を叩く**、が合言葉
 
 --
 
@@ -291,22 +346,25 @@ df[["PriceMan", "Area", "BuildingAge"]].describe()
 
 --
 
-### コード解説③ mean() と median()
+### コード解説③ 平均と中央値の出し方
 
 ```python
 mean_price   = df["PriceMan"].mean()
 median_price = df["PriceMan"].median()
-print(f"  平均:   {mean_price:,.0f} 万円")
-print(f"  差:     {mean_price - median_price:+,.0f} 万円")
+print(f"平均:   {mean_price:,.0f} 万円")
+print(f"差:     {mean_price - median_price:+,.0f} 万円")
 ```
 
-- `df["列名"]` は **Series**（1 列分の配列）
-- Series に `.mean()` / `.median()` / `.std()` など統計メソッドが生えている
-- f-string の **フォーマット指定子**:
-  - `:,.0f` → 3 桁区切り + 小数点以下 0 桁（例: `1,300`）
-  - `:+,.0f` → 符号付き（例: `+131`）
+- `df["PriceMan"]` = 価格の列だけを取り出す
+- そこに `.mean()` や `.median()` を付ければ計算完了
+- 本当にこれだけ。for ループも、合計 ÷ 件数 も書かなくていい
 
-→ **print デバッグの見やすさ** は分析のスピードに直結
+**f-string の小ワザ**:
+
+- `{数字:,.0f}` → `1,300` のように 3 桁ごとにカンマが入る
+- `{数字:+,.0f}` → `+131` のように符号が付く
+
+→ 結果を「見やすく」出すだけで分析のストレスが激減
 
 --
 
@@ -325,7 +383,7 @@ print(f"  差:     {mean_price - median_price:+,.0f} 万円")
 
 --
 
-### コード解説④ groupby で一気に集計
+### コード解説④ 区ごとにまとめて集計する
 
 ```python
 area_std = (
@@ -333,31 +391,38 @@ area_std = (
       .agg(["std", "median"])
       .sort_values("std", ascending=False)
 )
-area_std["変動係数"] = (area_std["std"] / area_std["median"] * 100).round(1)
 ```
 
-- `groupby("Municipality")` → 市区町村ごとに **グループ分け**
-- `["PriceMan"]` で対象列を絞る
-- `.agg(["std", "median"])` で **複数の統計量をまとめて計算**
-- 結果は「Municipality を index に持つ DataFrame」になる
-- 新しい列 `変動係数` は **既存列同士の演算** で作れる（ベクトル化）
+**イメージ**: 500 件の物件カードを「港区の山・新宿区の山…」と
+区ごとに分けて、山ごとに統計を出す感じ
 
-→ **SQL で言えば `GROUP BY + 複数集計`** を 1 行で書けるのが pandas の強み
+- `groupby("Municipality")` = **市区町村ごとに仲間分け**
+- `["PriceMan"]` = その中で価格の列だけ見る
+- `.agg(["std", "median"])` = バラつきと中央値を **同時に計算**
+- `.sort_values("std", ...)` = バラつきが大きい順に並べ替え
+
+→ Excel のピボットテーブルに近いことが 4 行で書ける
 
 --
 
-### コード解説⑤ なぜ変動係数を使うのか
+### コード解説⑤ バラつきの「比較」は割り算で
 
 ```python
 area_std["変動係数"] = area_std["std"] / area_std["median"] * 100
 ```
 
-- 標準偏差 **だけ** を見ると高いエリアほど大きく出る
-  - 例: 港区の std は板橋区より大きいのは当然（価格の絶対額が違う）
-- **標準偏差 ÷ 中央値** で割ると **スケールの影響を消せる**
-- → 異なるエリアの **バラつきを公平に比較** できる
+**なぜ割るのか？**
 
-これが「**数字を割って無次元化する**」という統計の基本テクニック
+- 港区の価格が 2,000 万、板橋区が 800 万
+- 当然、港区のほうが **金額のバラつき(std)も大きく出る**
+- それだと「港区のほうがリスク高い！」と勘違いしそう
+
+でも本当に知りたいのは「中央値に対して **何%** ブレるか」
+
+- `std ÷ median × 100` = **変動係数**（%）
+- これなら金額の大小に関係なく、**公平に比べられる**
+
+→ 物差しを揃えるだけでデータの見え方が変わる、という統計の基本
 
 ---
 
