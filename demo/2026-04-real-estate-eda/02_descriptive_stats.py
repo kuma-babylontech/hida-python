@@ -6,17 +6,19 @@
 - pandas の describe() で一発確認
 """
 
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 
 DATA_PATH = Path(__file__).parent / "data" / "tokyo_mansion.csv"
+CURRENT_YEAR = datetime.now().year
 
 
 def load_data() -> pd.DataFrame:
     df = pd.read_csv(DATA_PATH)
-    # 築年数を計算
-    df["BuildingAge"] = 2025 - df["BuildingYear"].str.replace("年", "").astype(int)
+    # 築年数を計算（現在年 − 建築年）
+    df["BuildingAge"] = CURRENT_YEAR - df["BuildingYear"].str.replace("年", "").astype(int)
     # 価格を万円単位に変換
     df["PriceMan"] = df["TradePrice"] / 10000
     # 平米単価を万円単位に

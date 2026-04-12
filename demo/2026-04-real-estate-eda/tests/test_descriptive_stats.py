@@ -34,11 +34,13 @@ class TestLoadData:
             df["PriceMan"], expected, check_names=False
         )
 
-    def test_building_age_formula(self, df):
+    def test_building_age_formula(self, descriptive_mod, df):
         # 生データから再計算して一致すること
         years = df["BuildingYear"].str.replace("年", "").astype(int)
         pd.testing.assert_series_equal(
-            df["BuildingAge"], 2025 - years, check_names=False
+            df["BuildingAge"],
+            descriptive_mod.CURRENT_YEAR - years,
+            check_names=False,
         )
 
 

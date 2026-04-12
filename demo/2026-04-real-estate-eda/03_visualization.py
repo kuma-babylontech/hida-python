@@ -8,6 +8,7 @@ matplotlib + seaborn で4種類のグラフを描く:
 4. 相関行列ヒートマップ — 変数間の関係を俯瞰
 """
 
+from datetime import datetime
 from pathlib import Path
 
 import japanize_matplotlib  # noqa: F401
@@ -17,11 +18,12 @@ import seaborn as sns
 
 DATA_PATH = Path(__file__).parent / "data" / "tokyo_mansion.csv"
 OUTPUT_DIR = Path(__file__).parent / "output"
+CURRENT_YEAR = datetime.now().year
 
 
 def load_data() -> pd.DataFrame:
     df = pd.read_csv(DATA_PATH)
-    df["BuildingAge"] = 2025 - df["BuildingYear"].str.replace("年", "").astype(int)
+    df["BuildingAge"] = CURRENT_YEAR - df["BuildingYear"].str.replace("年", "").astype(int)
     df["PriceMan"] = df["TradePrice"] / 10000
     df["UnitPriceMan"] = df["UnitPrice"] / 10000
     return df

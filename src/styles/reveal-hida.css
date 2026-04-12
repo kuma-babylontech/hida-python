@@ -67,6 +67,18 @@ section.has-dark-background h6 {
 .reveal .slides section > section {
   line-height: 1.6;
   font-weight: inherit;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.reveal .slides section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reveal .slides section::-webkit-scrollbar-thumb {
+  background: rgba(168, 116, 76, 0.4);
+  border-radius: 3px;
 }
 
 /* ===========================
