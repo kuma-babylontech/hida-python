@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { ThemeToggle } from '../common/ThemeToggle'
 
 export function Header() {
   return (
@@ -15,7 +14,6 @@ export function Header() {
             </span>
           </div>
         </Link>
-        <ThemeToggle />
       </div>
     </header>
   )
