@@ -40,7 +40,10 @@ hida-python/
 ├── slides/                     # Markdownスライドファイル
 │   └── YYYY-MM-title/
 │       ├── slide.md            # スライド本体
-│       └── assets/             # スライド用画像等
+│       └── assets/             # スライド用画像（編集元。配信は public/slides/ 側）
+├── demo/                       # スライド付属のPythonデモ（Web本体とは独立）
+│   ├── YYYY-MM-title/          # 各回のデモ（番号付きスクリプト + tests/）
+│   └── _shared/                # シリーズ共通の取得・正規化基盤（reinfolib）
 ├── tests/
 │   ├── components/
 │   └── utils/
@@ -166,8 +169,19 @@ Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwin
 
 1. `slides/YYYY-MM-title/` ディレクトリを作成
 2. `slide.md` にフロントマターとスライド内容を記述
-3. 必要に応じて `assets/` に画像を配置
+3. 画像は `slides/YYYY-MM-title/assets/`（編集元）と `public/slides/YYYY-MM-title/assets/`（**実際の配信元**）の**両方**に置く。`src/utils/slides.ts` が `![](assets/x)` を `${BASE_URL}slides/<id>/assets/x` へ変換するため、`public/slides/` 側に無いと表示されない
 4. コミット・プッシュで自動デプロイ
+
+## デモコード（`demo/`）
+
+一部のスライドには、発表で見せるPythonデモが `demo/YYYY-MM-title/` に付属する（Web本体とは独立。デプロイ対象外で、GitHubで閲覧・各自ローカル実行する想定）。
+
+- スクリプトは実行順に**番号始まり**（`01_*.py` 等）。数字始まりで通常 `import` できないため、`tests/conftest.py` は `importlib.util` で動的ロードしてフィクスチャ化する
+- 各デモは自前の `requirements.txt` と `.venv`（gitignore）を持つ。生成物は `demo/*/output/` に出力（gitignore 済み）
+- **`demo/_shared/reinfolib.py`** = 不動産シリーズ（Part1〜3）共通の実データ取得・正規化基盤。国交省「不動産情報ライブラリ」XIT001 API を扱う。詳細は `demo/_shared/README.md`
+  - 環境変数 `REINFOLIB_API_KEY` があれば本番API、無ければ実API形状のオフラインサンプル（`sample_xit001.csv`）にフォールバック
+  - 実APIのクセを `normalize()` で吸収: **建築年は和暦**（`平成20年`、マンションは西暦混在）/ **全角数字**（`第４四半期`）/ **全項目が文字列** / `戦前`・空値は NaN 化
+  - **XIT001 に最寄駅・駅徒歩の項目は無い**（`NearestStation`/`TimeToNearestStation` は存在しない）。駅を使った分析は不可で、面積・築年数・用途地域・構造などで代替する
 
 ## コーディング規約
 
