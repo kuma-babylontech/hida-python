@@ -19,8 +19,13 @@ class TestLoadData:
 
     def test_has_required_columns(self, simple_reg_mod):
         df = simple_reg_mod.load_data()
-        for col in ("BuildingAge", "PriceMan", "TimeToNearestStation", "Area"):
+        for col in ("BuildingAge", "PriceMan", "Area"):
             assert col in df.columns
+
+    def test_no_station_column(self, simple_reg_mod):
+        # 実 API (XIT001) に駅情報は無い。基盤も駅列を作らないことを保証する。
+        df = simple_reg_mod.load_data()
+        assert "TimeToNearestStation" not in df.columns
 
 
 class TestSimpleRegression:
@@ -49,12 +54,11 @@ class TestMultipleRegression:
         return multi_reg_mod.run_multiple_regression(df)
 
     def test_all_pvalues_significant(self, model):
-        for var in ["BuildingAge", "TimeToNearestStation", "Area"]:
+        for var in ["Area", "BuildingAge"]:
             assert model.pvalues[var] < 0.05
 
     def test_coefficient_signs(self, model):
         assert model.params["BuildingAge"] < 0
-        assert model.params["TimeToNearestStation"] < 0
         assert model.params["Area"] > 0
 
     def test_r_squared_higher_than_simple(self, simple_reg_mod, multi_reg_mod):
@@ -69,7 +73,7 @@ class TestResiduals:
         import statsmodels.api as sm
 
         df = multi_reg_mod.load_data()
-        X = df[["BuildingAge", "TimeToNearestStation", "Area"]]
+        X = df[["Area", "BuildingAge"]]
         X = sm.add_constant(X)
         y = df["PriceMan"]
         model = sm.OLS(y, X).fit()
@@ -80,7 +84,7 @@ class TestResiduals:
         import statsmodels.api as sm
 
         df = multi_reg_mod.load_data()
-        X = df[["BuildingAge", "TimeToNearestStation", "Area"]]
+        X = df[["Area", "BuildingAge"]]
         X = sm.add_constant(X)
         y = df["PriceMan"]
         model = sm.OLS(y, X).fit()

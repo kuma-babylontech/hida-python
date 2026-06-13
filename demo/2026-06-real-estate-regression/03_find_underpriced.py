@@ -7,7 +7,7 @@
 - 残差のヒストグラムでモデルの健全性を確認
 """
 
-from datetime import datetime
+import sys
 from pathlib import Path
 
 import japanize_matplotlib  # noqa: F401
@@ -15,22 +15,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import statsmodels.api as sm
 
-DATA_PATH = Path(__file__).parent.parent / "2026-04-real-estate-eda" / "data" / "tokyo_mansion.csv"
+# 共通の実データ取得基盤（demo/_shared/reinfolib.py）を読み込む。
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_shared"))
+import reinfolib  # noqa: E402
+
 OUTPUT_DIR = Path(__file__).parent / "output"
-CURRENT_YEAR = datetime.now().year
+
+#: 相場の予測に使う説明変数（実 API に存在する数値項目）。
+FEATURES = ["Area", "BuildingAge"]
 
 
 def load_data() -> pd.DataFrame:
-    df = pd.read_csv(DATA_PATH)
-    df["BuildingAge"] = CURRENT_YEAR - df["BuildingYear"].str.replace("年", "").astype(int)
-    df["PriceMan"] = df["TradePrice"] / 10000
-    return df
+    """実データ取得基盤から分析レディな DataFrame を得る。"""
+    return reinfolib.load_dataframe()
 
 
 def main():
     df = load_data()
 
-    X = df[["BuildingAge", "TimeToNearestStation", "Area"]]
+    X = df[FEATURES]
     X = sm.add_constant(X)
     y = df["PriceMan"]
     model = sm.OLS(y, X).fit()
@@ -42,7 +45,7 @@ def main():
     print("=" * 60)
     print("■ 割安物件トップ 10（残差が小さい順）")
     print("=" * 60)
-    cols = ["Municipality", "NearestStation", "BuildingAge",
+    cols = ["Municipality", "DistrictName", "Area", "BuildingAge",
             "PriceMan", "predicted", "residual"]
     bargains = df.sort_values("residual").head(10)[cols].copy()
     bargains["predicted"] = bargains["predicted"].round(0)

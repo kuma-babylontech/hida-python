@@ -7,7 +7,7 @@
 - 散布図に回帰直線を重ねて可視化
 """
 
-from datetime import datetime
+import sys
 from pathlib import Path
 
 import japanize_matplotlib  # noqa: F401
@@ -16,17 +16,20 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-DATA_PATH = Path(__file__).parent.parent / "2026-04-real-estate-eda" / "data" / "tokyo_mansion.csv"
+# 共通の実データ取得基盤（demo/_shared/reinfolib.py）を読み込む。
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "_shared"))
+import reinfolib  # noqa: E402
+
 OUTPUT_DIR = Path(__file__).parent / "output"
-CURRENT_YEAR = datetime.now().year
 
 
 def load_data() -> pd.DataFrame:
-    df = pd.read_csv(DATA_PATH)
-    df["BuildingAge"] = CURRENT_YEAR - df["BuildingYear"].str.replace("年", "").astype(int)
-    df["PriceMan"] = df["TradePrice"] / 10000
-    df["UnitPriceMan"] = df["UnitPrice"] / 10000
-    return df
+    """実データ取得基盤から分析レディな DataFrame を得る。
+
+    鍵（REINFOLIB_API_KEY）があれば本番 API、無ければ実 API 形状のオフライン
+    サンプル。BuildingAge / PriceMan / UnitPriceMan などの派生列は reinfolib が付与する。
+    """
+    return reinfolib.load_dataframe()
 
 
 def run_simple_regression(df: pd.DataFrame) -> sm.regression.linear_model.RegressionResultsWrapper:
