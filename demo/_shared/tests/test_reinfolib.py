@@ -165,12 +165,12 @@ class TestFetchTransactions:
 
 
 # ---------------------------------------------------------------------------
-# load_dataframe: オフラインサンプル経由のエンドツーエンド
+# load_dataframe: オフライン実データスナップショット経由のエンドツーエンド
 # ---------------------------------------------------------------------------
 class TestLoadDataframeOffline:
     @pytest.fixture(scope="class")
     def df(self):
-        # 鍵が無い環境を保証してオフラインサンプルを使わせる。
+        # 鍵が無い環境を保証してオフラインスナップショットを使わせる。
         import os
 
         saved = os.environ.pop("REINFOLIB_API_KEY", None)
@@ -188,7 +188,7 @@ class TestLoadDataframeOffline:
             assert col in df.columns
 
     def test_no_station_fields(self, df):
-        # 実 API に無い駅情報がサンプルにも無いこと（忠実性の担保）。
+        # 実 API に駅情報が無いこと（XIT001 の出力に存在しない）。
         assert "NearestStation" not in df.columns
         assert "TimeToNearestStation" not in df.columns
 
@@ -199,3 +199,9 @@ class TestLoadDataframeOffline:
 
     def test_only_oneroom(self, df):
         assert df["FloorPlan"].str.contains("１Ｒ|１Ｋ|1R|1K").all()
+
+    def test_area_bounded_to_oneroom_range(self, df):
+        # 間取りが 1K でも 135㎡ といった誤登録は面積で除外される。
+        assert df["Area"].between(
+            reinfolib.ONEROOM_AREA_MIN, reinfolib.ONEROOM_AREA_MAX
+        ).all()
