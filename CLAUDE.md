@@ -125,7 +125,13 @@ npm run test
 
 # Lint
 npm run lint
+
+# テスト（カバレッジ / UI）
+npm run test:coverage
+npm run test:ui
 ```
+
+> スペルチェック設定は `cspell.json` を参照。
 
 ## GitHub Pagesデプロイ
 
@@ -147,19 +153,14 @@ npm run lint
 
 ### テーマカラー
 
-Tailwind CSSのカスタムカラーを使用。ダークモード対応。
+Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwind.config.js` は**存在しない**。
+テーマは `src/styles/index.css` の `@theme` ブロックにCSS変数として定義する。
 
-```javascript
-// tailwind.config.js
-theme: {
-  extend: {
-    colors: {
-      primary: {...},    // メインカラー
-      secondary: {...},  // サブカラー
-    }
-  }
-}
-```
+- カラー: `primary-50`〜`primary-950`、`python-blue` / `python-yellow`、`hida-cedar` / `hida-cedar-light` / `hida-ink` / `hida-paper` / `hida-warm`
+- ダークモード: `@custom-variant dark (&:where(.dark, .dark *))`（class方式。`src/hooks/useTheme.ts` で切替）
+- フォント: `--font-display`（明朝）/ `--font-body`（ゴシック）/ `--font-mono`
+
+> 色・フォントを追加・変更する場合は `tailwind.config.js` ではなく `src/styles/index.css` の `@theme` を編集する。
 
 ## 新しいスライドの追加手順
 
@@ -192,3 +193,7 @@ theme: {
 
 - reveal.js のスタイルとTailwind CSSの競合に注意
 - GitHub Pagesはハッシュベースルーティングを使用（ヒストリーAPIは404になる）
+- スライドは `import.meta.glob('/slides/**/slide.md', { query: '?raw' })` で**ビルド時にバンドル**される（実行時fetchではない）。新規スライドは再ビルドで反映。`vite.config.ts` の `assetsInclude: ['**/*.md']` が前提
+- スライド内画像は `![](assets/xxx)` と相対指定する → `src/utils/slides.ts` が `BASE_URL` 付き絶対パスへ自動変換
+- フロントマター解析は `src/utils/slides.ts` の自前簡易パーサ（`gray-matter` は依存にあるが未使用）。ネストや複雑なYAMLは非対応で、`title` / `date` / `description` / `tags`（リスト）/ `author` のみ想定
+- パスエイリアス `@` → `src`（`vite.config.ts`）。`base` は `/hida-python/`
