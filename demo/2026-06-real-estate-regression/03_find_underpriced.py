@@ -41,13 +41,17 @@ def main():
     df["predicted"] = model.predict(X)
     df["residual"] = df["PriceMan"] - df["predicted"]
 
+    # 実価格が相場の半額未満の物件は、特殊事情（借地権・事故物件等）や
+    # データ異常の可能性が高いので、割安候補からは除外する。
+    candidates = df[df["PriceMan"] >= 0.5 * df["predicted"]]
+
     # 割安トップ10
     print("=" * 60)
-    print("■ 割安物件トップ 10（残差が小さい順）")
+    print("■ 割安物件トップ 10（残差が小さい順 / 極端な安値は除外）")
     print("=" * 60)
     cols = ["Municipality", "DistrictName", "Area", "BuildingAge",
             "PriceMan", "predicted", "residual"]
-    bargains = df.sort_values("residual").head(10)[cols].copy()
+    bargains = candidates.sort_values("residual").head(10)[cols].copy()
     bargains["predicted"] = bargains["predicted"].round(0)
     bargains["residual"] = bargains["residual"].round(0)
     print(bargains.to_string(index=False))
