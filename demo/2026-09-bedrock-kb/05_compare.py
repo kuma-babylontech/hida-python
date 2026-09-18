@@ -21,10 +21,17 @@ def _load(module_name, filename):
     return module
 
 
-def kb_answer():
-    """Knowledge Bases 版。使えなければ None。"""
-    if not common.KNOWLEDGE_BASE_ID:
+def _kb_snapshot():
+    snapshot = common.load_snapshot("03_retrieve_and_generate")
+    if snapshot is None:
         return None
+    return {"answer": snapshot["answer"], "sources": [s["document"] for s in snapshot["sources"]]}
+
+
+def kb_answer():
+    """Knowledge Bases 版。KB が無い・呼べないときはスナップショットへ。"""
+    if not common.KNOWLEDGE_BASE_ID:
+        return _kb_snapshot()
     rag_module = _load("kb_rag", "03_kb_retrieve_and_generate.py")
     try:
         response = rag_module.retrieve_and_generate(common.QUESTION)
@@ -33,10 +40,7 @@ def kb_answer():
             "sources": [s["document"] for s in rag_module.build_citations(response)],
         }
     except Exception:
-        snapshot = common.load_snapshot("03_retrieve_and_generate")
-        if snapshot is None:
-            return None
-        return {"answer": snapshot["answer"], "sources": [s["document"] for s in snapshot["sources"]]}
+        return _kb_snapshot()
 
 
 def diy_answer():
