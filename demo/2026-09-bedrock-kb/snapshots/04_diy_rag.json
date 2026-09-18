@@ -1,0 +1,19 @@
+{
+  "question": "飛騨高山Pythonの会の不動産データ分析で、重回帰分析の決定係数R²はいくつでしたか？",
+  "chunk_count": 65,
+  "hits": [
+    {
+      "source": "2026-06-real-estate-regression",
+      "score": 0.5126
+    },
+    {
+      "source": "2026-06-real-estate-regression",
+      "score": 0.4793
+    },
+    {
+      "source": "2026-06-real-estate-regression",
+      "score": 0.4113
+    }
+  ],
+  "answer": "資料に基づいて答えます。\n\n飛騨高山Pythonの会の不動産データ分析（Part 2 — 回帰分析）における重回帰分析の決定係数 **R² = 0.488** です。\n\nこれは約 49% のデータのばらつきを説明できることを意味し、単回帰の R² = 0.300（約 30%）から大幅に向上しています。"
+}

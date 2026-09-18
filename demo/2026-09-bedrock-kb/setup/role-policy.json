@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeEmbeddingModel",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": "arn:aws:bedrock:__REGION__::foundation-model/amazon.titan-embed-text-v2:0"
+    },
+    {
+      "Sid": "ReadSourceBucket",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::hida-python-kb-demo-__ACCOUNT_ID__",
+        "arn:aws:s3:::hida-python-kb-demo-__ACCOUNT_ID__/*"
+      ],
+      "Condition": { "StringEquals": { "aws:ResourceAccount": "__ACCOUNT_ID__" } }
+    },
+    {
+      "Sid": "UseS3Vectors",
+      "Effect": "Allow",
+      "Action": [
+        "s3vectors:GetIndex",
+        "s3vectors:PutVectors",
+        "s3vectors:GetVectors",
+        "s3vectors:QueryVectors",
+        "s3vectors:ListVectors",
+        "s3vectors:DeleteVectors"
+      ],
+      "Resource": [
+        "arn:aws:s3vectors:__REGION__:__ACCOUNT_ID__:bucket/hida-python-kb-demo",
+        "arn:aws:s3vectors:__REGION__:__ACCOUNT_ID__:bucket/hida-python-kb-demo/index/slides-index"
+      ]
+    }
+  ]
+}
