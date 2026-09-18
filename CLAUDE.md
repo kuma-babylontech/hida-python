@@ -187,6 +187,9 @@ Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwin
 - **`demo/2026-09-bedrock-kb/`**（Bedrock Knowledge Bases）は AWS 実環境を使う唯一のデモ。`AWS_PROFILE=babylon-tech` / `ap-northeast-1` 前提
   - **素のモデルID（`anthropic.claude-*`）を `modelId` に渡すと `ValidationException`**。`jp.` などの**推論プロファイル**を指定する（`aws bedrock list-inference-profiles` で確認）
   - S3 Vectors のインデックスは作成時に次元が決まる。埋め込みモデル（Titan v2 = 1024）と**一致していないと取り込みが落ちる**
+  - **同期ジョブは `COMPLETE` でもドキュメント単位で失敗している**ことがある。`numberOfDocumentsFailed` を必ず見る（`aws bedrock-agent get-ingestion-job --query 'ingestionJob.statistics'`）。失敗しても検索は成功し、**結果が静かに減るだけ**なので気づけない
+  - S3 Vectors は**フィルタ可能メタデータを2048バイトまで**に制限する。インデックス作成時の `nonFilterableMetadataKeys` に **`AMAZON_BEDROCK_TEXT` と `AMAZON_BEDROCK_METADATA` の両方**を入れる。`AMAZON_BEDROCK_TEXT` だけだと4本中3本が `Filterable metadata must have at most 2048 bytes` で落ちた
+  - インデックスのメタデータ設定は**後から変えられない**。直すにはKB→インデックスの順で消して作り直す
   - `02`・`03` は Knowledge Base が要る。`setup/provision.sh` で作り、**発表後に `setup/teardown.sh` で消す**（ベクトルストアは保管量で課金）
   - 資料は `slides/*/slide.md` を読むが、**この回の発表資料自身は除外する**（`common.EXCLUDED_SLIDES` と `provision.sh` の両方に書いてあるので、片方だけ直すと食い違う）
   - スライドに載せた数値（65チャンク・1024次元・score）は `04_diy_rag.py` の実行結果。過去スライドを編集するとチャンク数が変わるため、直したら再実行して合わせる

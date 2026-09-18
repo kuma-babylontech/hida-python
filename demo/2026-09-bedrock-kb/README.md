@@ -62,6 +62,38 @@ export KNOWLEDGE_BASE_ID=XXXXXXXXXX   # provision.sh が最後に表示する
 `jp.` や `apac.` の付いた**推論プロファイル**を指定する。
 利用できるものは `aws bedrock list-inference-profiles` で確認する。
 
+## 同期が「完了」でも失敗していることがある
+
+`status=COMPLETE` でも、ドキュメント単位では落ちていることがある。
+落ちても検索自体は成功し、**結果が静かに減るだけ**なので気づきにくい。
+
+```bash
+aws bedrock-agent get-ingestion-job \
+  --knowledge-base-id "$KNOWLEDGE_BASE_ID" \
+  --data-source-id "$DS_ID" --ingestion-job-id "$JOB_ID" \
+  --query 'ingestionJob.statistics'
+```
+
+`numberOfDocumentsFailed` が 0 であることを必ず確かめる。
+
+実際に踏んだ失敗は次のもの。
+
+```text
+Filterable metadata must have at most 2048 bytes
+```
+
+S3 Vectors は検索条件に使えるメタデータを 2048 バイトに制限する。
+Knowledge Bases はチャンク本文とメタデータをここへ入れるため、超える。
+インデックス作成時に**両方のキー**を非フィルタ対象として宣言しておく。
+
+```bash
+--metadata-configuration \
+  '{"nonFilterableMetadataKeys":["AMAZON_BEDROCK_TEXT","AMAZON_BEDROCK_METADATA"]}'
+```
+
+`AMAZON_BEDROCK_TEXT` だけでは足りず、4本中3本が落ちた。
+**この設定は後から変更できない**ので、直すには KB とインデックスを作り直す。
+
 `03` が使う `modelArn` は推論プロファイルの ARN を組み立てている。
 別アカウントで動かすときは `AWS_ACCOUNT_ID` か `BEDROCK_MODEL_ARN` を渡す。
 

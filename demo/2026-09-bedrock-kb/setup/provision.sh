@@ -45,7 +45,7 @@ aws s3vectors get-vector-bucket --vector-bucket-name "$VECTOR_BUCKET" >/dev/null
 aws s3vectors get-index --vector-bucket-name "$VECTOR_BUCKET" --index-name "$INDEX_NAME" >/dev/null 2>&1 || \
   aws s3vectors create-index --vector-bucket-name "$VECTOR_BUCKET" --index-name "$INDEX_NAME" \
     --data-type float32 --dimension 1024 --distance-metric cosine \
-    --metadata-configuration '{"nonFilterableMetadataKeys":["AMAZON_BEDROCK_TEXT"]}' >/dev/null
+    --metadata-configuration '{"nonFilterableMetadataKeys":["AMAZON_BEDROCK_TEXT","AMAZON_BEDROCK_METADATA"]}' >/dev/null
 
 echo "==> 4/6 Knowledge Bases 用の IAM ロール"
 # ポリシーはアカウントIDを埋め込んでから渡す（リポジトリには直書きしない）

@@ -254,6 +254,23 @@ for r in response["retrievalResults"]:
 
 --
 
+### 実際に返ってきたもの
+
+```text
+[1] score=0.8124  出典=2026-06-real-estate-regression.md
+    R² は 0.30 → 0.49 に上がります ... ## 重回帰分析
+
+[2] score=0.7757  出典=2026-06-real-estate-regression.md
+    ... R-squared:  0.488 ``` ### 重回帰の結果を読む
+
+[3] score=0.7572  出典=2026-06-real-estate-regression.md
+    R-squared = このモデルはどれくらい当たる？ ...
+```
+
+4本のスライドから、**6月の回帰分析の回だけ**を引けている
+
+--
+
 ### ② RetrieveAndGenerate — 検索＋生成
 
 ```python
@@ -290,6 +307,22 @@ def build_citations(response):
 - 回答文の中に LLM が書いた「出典」は使わない
 
 → LLM に書かせると、**存在しない出典を創作する余地**が残る
+
+--
+
+### 実際の回答
+
+> 飛騨高山Pythonの会の不動産データ分析で、
+> 重回帰分析の決定係数R²は **0.488** でした。
+
+```text
+出典:
+  [1] 2026-06-real-estate-regression.md
+  [2] 2026-06-real-estate-regression.md
+      ... R-squared:  0.488 ``` ### 重回帰の結果を読む
+```
+
+6月の発表資料の数字と一致。**RAG のコードは0行**
 
 ---
 
@@ -499,7 +532,77 @@ aws bedrock list-inference-profiles   # 使えるものを確認
 
 --
 
-### ② ベクトルの次元を合わせる
+### ② 同期が「完了」でも失敗している
+
+昨日ここで1時間溶かしました
+
+```text
+status=COMPLETE     ← 成功に見える
+```
+
+でも中身を見ると
+
+```text
+numberOfDocumentsScanned:     4
+numberOfNewDocumentsIndexed:  1
+numberOfDocumentsFailed:      3   ← 3本落ちていた
+```
+
+**ジョブは COMPLETE、ドキュメントは FAILED**
+
+--
+
+### 何が起きていたか
+
+検索しても、いつも同じ1本からしか結果が返らない
+
+```text
+[1] 0.686 2026-04-real-estate-eda.md
+[2] 0.674 2026-04-real-estate-eda.md
+[3] 0.668 2026-04-real-estate-eda.md   （20件すべて同じ資料）
+```
+
+→ 答えのある6月の資料が、そもそも入っていなかった
+
+```text
+Filterable metadata must have at most 2048 bytes
+```
+
+--
+
+### 原因と直し方
+
+S3 Vectors は **検索条件に使えるメタデータを2048バイトまで**に制限する
+
+Knowledge Bases はチャンク本文とメタデータをここに入れるので、**超える**
+
+インデックスを作るときに「これは検索条件に使わない」と宣言しておく
+
+```bash
+aws s3vectors create-index \
+  --metadata-configuration '{"nonFilterableMetadataKeys":
+    ["AMAZON_BEDROCK_TEXT","AMAZON_BEDROCK_METADATA"]}'
+```
+
+`AMAZON_BEDROCK_TEXT` だけだと足りない ← ここでハマった
+
+--
+
+### 教訓
+
+**任せていても、落ちたら中を知らないと直せない**
+
+- エラーは出ない。**検索結果が静かに減るだけ**
+- 同期のたびに `numberOfDocumentsFailed` を見る
+
+```bash
+aws bedrock-agent get-ingestion-job ... \
+  --query 'ingestionJob.statistics'
+```
+
+--
+
+### ③ ベクトルの次元を合わせる
 
 S3 Vectors のインデックスは、**作るときに次元を決める**
 
@@ -517,7 +620,7 @@ aws s3vectors create-index \
 
 --
 
-### ③ 片付けを忘れない
+### ④ 片付けを忘れない
 
 - ベクトルストアは **置いておくだけで課金**される
 - 埋め込みと生成は従量なので、試す分には小さい
