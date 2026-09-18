@@ -66,17 +66,33 @@ fi
 aws iam put-role-policy --role-name "$ROLE_NAME" --policy-name KBDemoAccess \
   --policy-document "file://${WORK_DIR}/role-policy.json"
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
+echo "    ポリシーの反映を待つ (20s)"
+sleep 20
 
 echo "==> 5/6 Knowledge Base とデータソース"
 KB_ID="$(aws bedrock-agent list-knowledge-bases \
   --query "knowledgeBaseSummaries[?name=='${KB_NAME}'].knowledgeBaseId | [0]" --output text)"
 if [ "$KB_ID" = "None" ] || [ -z "$KB_ID" ]; then
-  KB_ID="$(aws bedrock-agent create-knowledge-base \
-    --name "$KB_NAME" \
-    --role-arn "$ROLE_ARN" \
-    --knowledge-base-configuration "{\"type\":\"VECTOR\",\"vectorKnowledgeBaseConfiguration\":{\"embeddingModelArn\":\"${EMBED_MODEL}\"}}" \
-    --storage-configuration "{\"type\":\"S3_VECTORS\",\"s3VectorsConfiguration\":{\"indexArn\":\"arn:aws:s3vectors:${REGION}:${ACCOUNT_ID}:bucket/${VECTOR_BUCKET}/index/${INDEX_NAME}\"}}" \
-    --query 'knowledgeBase.knowledgeBaseId' --output text)"
+  # 作成直後のロールは反映が遅れることがあり、S3 Vectors への権限が
+  # まだ見えずに ValidationException になる。数回やり直す。
+  KB_ID=""
+  for attempt in 1 2 3 4 5 6; do
+    if KB_ID="$(aws bedrock-agent create-knowledge-base \
+      --name "$KB_NAME" \
+      --role-arn "$ROLE_ARN" \
+      --knowledge-base-configuration "{\"type\":\"VECTOR\",\"vectorKnowledgeBaseConfiguration\":{\"embeddingModelArn\":\"${EMBED_MODEL}\"}}" \
+      --storage-configuration "{\"type\":\"S3_VECTORS\",\"s3VectorsConfiguration\":{\"indexArn\":\"arn:aws:s3vectors:${REGION}:${ACCOUNT_ID}:bucket/${VECTOR_BUCKET}/index/${INDEX_NAME}\"}}" \
+      --query 'knowledgeBase.knowledgeBaseId' --output text 2>/dev/null)"; then
+      break
+    fi
+    echo "    権限の反映待ち。${attempt}回目を再試行 (20s)"
+    KB_ID=""
+    sleep 20
+  done
+  if [ -z "$KB_ID" ]; then
+    echo "Knowledge Base を作成できなかった。もう一度このスクリプトを流す。"
+    exit 1
+  fi
 fi
 
 DS_ID="$(aws bedrock-agent list-data-sources --knowledge-base-id "$KB_ID" \

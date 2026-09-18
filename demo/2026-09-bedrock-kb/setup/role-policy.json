@@ -28,7 +28,10 @@
         "s3vectors:ListVectors",
         "s3vectors:DeleteVectors"
       ],
-      "Resource": "arn:aws:s3vectors:__REGION__:__ACCOUNT_ID__:bucket/hida-python-kb-demo/index/slides-index"
+      "Resource": [
+        "arn:aws:s3vectors:__REGION__:__ACCOUNT_ID__:bucket/hida-python-kb-demo",
+        "arn:aws:s3vectors:__REGION__:__ACCOUNT_ID__:bucket/hida-python-kb-demo/index/slides-index"
+      ]
     }
   ]
 }
