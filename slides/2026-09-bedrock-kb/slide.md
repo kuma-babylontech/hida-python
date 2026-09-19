@@ -79,6 +79,8 @@ print(response["output"]["message"]["content"][0]["text"])
 **質問**: 「飛騨高山Pythonの会の不動産データ分析で、
 　　　　　重回帰分析の決定係数R²はいくつでしたか？」
 
+▶ デモ: `01_ask_without_rag.py`
+
 --
 
 ### 答えられない
@@ -205,6 +207,12 @@ RAG のコードは **0行**
 
 --
 
+### 全体の構成
+
+![Bedrock Knowledge Bases のアーキテクチャ](assets/architecture.svg)
+
+--
+
 ### Python から叩く — クライアントは2つ
 
 ```python
@@ -269,6 +277,8 @@ for r in response["retrievalResults"]:
 
 4本のスライドから、**6月の回帰分析の回だけ**を引けている
 
+▶ デモ: `02_kb_retrieve.py`
+
 --
 
 ### ② RetrieveAndGenerate — 検索＋生成
@@ -323,6 +333,8 @@ def build_citations(response):
 ```
 
 6月の発表資料の数字と一致。**RAG のコードは0行**
+
+▶ デモ: `03_kb_retrieve_and_generate.py`
 
 ---
 
@@ -455,6 +467,8 @@ PROMPT = """あなたは飛騨高山Pythonの会の発表資料に答えるア�
 - 6月の発表資料の数字と一致
 - 全部で **約100行**、実行時間は **15秒ほど**
 
+▶ デモ: `04_diy_rag.py`
+
 ---
 
 ## 任せる / 書く の分かれ目
@@ -504,6 +518,8 @@ PROMPT = """あなたは飛騨高山Pythonの会の発表資料に答えるア�
 
 同じ答えにたどり着く。違うのは
 **途中に手を入れられるかどうか**
+
+▶ デモ: `05_compare.py`
 
 ---
 

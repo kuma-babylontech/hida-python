@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 316" width="1040" height="316" font-family="Hiragino Sans, Yu Gothic, Meiryo, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7db8da"/>
+    </marker>
+    <style>
+      .box  { fill: #15151f; stroke: #3d4a58; stroke-width: 2; rx: 9; }
+      .kb   { fill: #16202b; stroke: #7db8da; stroke-width: 2.5; rx: 9; }
+      .out  { fill: #1a2016; stroke: #8fb46a; stroke-width: 2.5; rx: 9; }
+      .name { fill: #f0ebe0; font-size: 16px; font-weight: 600; text-anchor: middle; }
+      .sub  { fill: #9aa4b0; font-size: 12.5px; text-anchor: middle; }
+      .lane { fill: #7db8da; font-size: 17px; font-weight: 700; }
+      .note { fill: #8b939e; font-size: 12.5px; }
+      .edge { stroke: #7db8da; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .elbl { fill: #d4cfc4; font-size: 12.5px; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- ===== 準備（1回だけ） ===== -->
+  <text class="lane" x="8" y="18">準備 — 資料を入れる（1回だけ）</text>
+
+  <rect class="box" x="8"   y="50" width="220" height="68"/>
+  <text class="name" x="118" y="78">S3</text>
+  <text class="sub"  x="118" y="100">スライド .md × 4本</text>
+
+  <rect class="kb"  x="276" y="50" width="220" height="68"/>
+  <text class="name" x="386" y="78">Knowledge Bases</text>
+  <text class="sub"  x="386" y="100">取り込み・分割</text>
+
+  <rect class="box" x="544" y="50" width="220" height="68"/>
+  <text class="name" x="654" y="78">Titan Embeddings</text>
+  <text class="sub"  x="654" y="100">1024次元のベクトル</text>
+
+  <rect class="box" x="812" y="50" width="220" height="68"/>
+  <text class="name" x="922" y="78">S3 Vectors</text>
+  <text class="sub"  x="922" y="100">slides-index</text>
+
+  <line class="edge" x1="232" y1="84" x2="271" y2="84"/>
+  <text class="elbl" x="252" y="42">同期</text>
+  <line class="edge" x1="500" y1="84" x2="539" y2="84"/>
+  <text class="elbl" x="520" y="42">埋め込み</text>
+  <line class="edge" x1="768" y1="84" x2="807" y2="84"/>
+  <text class="elbl" x="788" y="42">保存</text>
+
+  <text class="note" x="8" y="138">ここまでに書いた RAG のコードは 0 行</text>
+
+  <line x1="8" y1="152" x2="1032" y2="152" stroke="#2a2f38" stroke-width="1.5"/>
+
+  <!-- ===== 質問するたび ===== -->
+  <text class="lane" x="8" y="176">質問するたび</text>
+
+  <rect class="box" x="8"   y="208" width="176" height="68"/>
+  <text class="name" x="96"  y="236">Python</text>
+  <text class="sub"  x="96"  y="258">boto3</text>
+
+  <rect class="kb"  x="220" y="208" width="176" height="68"/>
+  <text class="name" x="308" y="236">Knowledge Bases</text>
+  <text class="sub"  x="308" y="258">Retrieve</text>
+
+  <rect class="box" x="432" y="208" width="176" height="68"/>
+  <text class="name" x="520" y="236">S3 Vectors</text>
+  <text class="sub"  x="520" y="258">近いチャンクを探す</text>
+
+  <rect class="box" x="644" y="208" width="176" height="68"/>
+  <text class="name" x="732" y="236">Claude Haiku 4.5</text>
+  <text class="sub"  x="732" y="258">見つけた文章で答える</text>
+
+  <rect class="out" x="856" y="208" width="176" height="68"/>
+  <text class="name" x="944" y="236">回答 ＋ 出典</text>
+  <text class="sub"  x="944" y="258">資料名・本文つき</text>
+
+  <line class="edge" x1="188" y1="242" x2="215" y2="242"/>
+  <text class="elbl" x="202" y="200">質問</text>
+  <line class="edge" x1="400" y1="242" x2="427" y2="242"/>
+  <text class="elbl" x="414" y="200">検索</text>
+  <line class="edge" x1="612" y1="242" x2="639" y2="242"/>
+  <text class="elbl" x="626" y="200">根拠</text>
+  <line class="edge" x1="824" y1="242" x2="851" y2="242"/>
+  <text class="elbl" x="838" y="200">生成</text>
+
+  <text class="note" x="8" y="302">青枠 = Knowledge Bases が引き受ける範囲。出典は citations から機械的に組み立てる（LLM には書かせない）</text>
+</svg>
