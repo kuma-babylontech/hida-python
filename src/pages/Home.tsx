@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { SlideListItem, TagFilter } from '@/components/slides'
 import { getAllSlides, getAllTags } from '@/utils'
 import type { SlideMetadata } from '@/types'
@@ -104,6 +105,14 @@ export function Home() {
             <span className="accent-dot" style={{ width: 4, height: 4 }} />
             Connpass
           </a>
+          <Link
+            to="/slides/profile"
+            className="inline-flex items-center gap-2 rounded-full border border-python-blue/30 bg-python-blue/5 px-5 py-2.5 text-xs font-medium tracking-wider text-python-blue hover:bg-python-blue/10 hover:border-python-blue/50 transition-all"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            <span className="accent-dot" style={{ width: 4, height: 4 }} />
+            Profile
+          </Link>
           <span className="text-gray-700 text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
             {slides.length} slides
           </span>
