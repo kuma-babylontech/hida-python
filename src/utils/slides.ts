@@ -67,6 +67,9 @@ function extractIdFromPath(path: string): string {
   return match ? match[1] : ''
 }
 
+// 発表そのものではないスライド。一覧とタグには出さず、直リンクでのみ開く
+const NON_TALK_SLIDE_IDS = new Set(['profile'])
+
 // すべてのスライドメタデータを取得
 export async function getAllSlides(): Promise<SlideMetadata[]> {
   const slides: SlideMetadata[] = []
@@ -75,6 +78,8 @@ export async function getAllSlides(): Promise<SlideMetadata[]> {
     const content = await loader()
     const { data } = parseFrontmatter(content)
     const id = extractIdFromPath(path)
+
+    if (NON_TALK_SLIDE_IDS.has(id)) continue
 
     slides.push({
       id,
