@@ -191,6 +191,7 @@ Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwin
   - S3 Vectors は**フィルタ可能メタデータを2048バイトまで**に制限する。インデックス作成時の `nonFilterableMetadataKeys` に **`AMAZON_BEDROCK_TEXT` と `AMAZON_BEDROCK_METADATA` の両方**を入れる。`AMAZON_BEDROCK_TEXT` だけだと4本中3本が `Filterable metadata must have at most 2048 bytes` で落ちた
   - インデックスのメタデータ設定は**後から変えられない**。直すにはKB→インデックスの順で消して作り直す
   - `02`・`03` は Knowledge Base が要る。`setup/provision.sh` で作り、**発表後に `setup/teardown.sh` で消す**（ベクトルストアは保管量で課金）
+  - **Claude の利用料は `Amazon Bedrock` ではなく `AWS Marketplace` から請求される**（サービス名もモデルごと）。埋め込み（Titan）とKBは `Amazon Bedrock` 側。予算はアカウント基盤（`babylon-tech/aws-account-baseline`）の `bedrock-marketplace-models-monthly`（月20 USD）と `bedrock-first-party-monthly`（月10 USD）で見張っている。方針は [`~/dotfiles/templates/aws-conventions.md`](file:///Users/kuma/dotfiles/templates/aws-conventions.md)
   - 資料は `slides/*/slide.md` を読むが、**この回の発表資料自身は除外する**（`common.EXCLUDED_SLIDES` と `provision.sh` の両方に書いてあるので、片方だけ直すと食い違う）
   - スライドに載せた数値（65チャンク・1024次元・score）は `04_diy_rag.py` の実行結果。過去スライドを編集するとチャンク数が変わるため、直したら再実行して合わせる
 
