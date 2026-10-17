@@ -194,6 +194,11 @@ Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwin
   - **Claude の利用料は `Amazon Bedrock` ではなく `AWS Marketplace` から請求される**（サービス名もモデルごと）。埋め込み（Titan）とKBは `Amazon Bedrock` 側。予算はアカウント基盤（`babylon-tech/aws-account-baseline`）の `bedrock-marketplace-models-monthly`（月20 USD）と `bedrock-first-party-monthly`（月10 USD）で見張っている。方針は [`~/dotfiles/templates/aws-conventions.md`](file:///Users/kuma/dotfiles/templates/aws-conventions.md)
   - 資料は `slides/*/slide.md` を読むが、**この回の発表資料自身は除外する**（`common.EXCLUDED_SLIDES` と `provision.sh` の両方に書いてあるので、片方だけ直すと食い違う）
   - スライドに載せた数値（65チャンク・1024次元・score）は `04_diy_rag.py` の実行結果。過去スライドを編集するとチャンク数が変わるため、直したら再実行して合わせる
+- **`demo/2026-10-python315/`**（Python 3.15 新機能）は 3.15 の新構文（`lazy import`・`frozendict` 等）を使うので **3.15 未満では読み込みすら失敗する**。`.venv` は `uv venv -p 3.15` で作る
+  - **uv が古いと `uv python install 3.15` で alpha 版（3.15.0a7）が入る**。正式版は新しい uv が要る（`uv self update`、または `uvx --from uv uv python install 3.15.0`）
+  - 速度比較（`06_compare_versions.py`）は `uv python find --managed-python` で**uv 管理のビルドに揃えている**。Homebrew 版が混ざるとビルド条件が違い比較が歪む
+  - **Tachyon（`python -m profiling.sampling`）は macOS だと sudo が要る**（`Permission Error: Unable to access process memory`）。スライドのフレームグラフは `python:3.15-slim` の Docker で作った
+  - スライドの速度表・lazy import の起動時間は手元 Mac の実測。再計測したら表も差し替える
 
 ## コーディング規約
 
