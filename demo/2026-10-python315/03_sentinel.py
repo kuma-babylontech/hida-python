@@ -1,39 +1,49 @@
 """PEP 661: sentinel で「引数が渡されなかった」と「None が渡された」を区別する。
 
+例: プロフィールの更新。ニックネームを
+  - 渡さなければ「変えない」
+  - None を渡せば「消す」
+  - 文字列を渡せば「書き換える」
+
     python3.15 03_sentinel.py
 """
 
 import copy
 import pickle
+from dataclasses import dataclass
 
-MISSING = sentinel("MISSING")
-
-_store = {"name": "飛騨高山", "nickname": None}
+KEEP = sentinel("KEEP")
 
 
-def get(key: str, default=MISSING) -> object:
-    """default を省略したときだけ KeyError にする（None を既定値として渡すことはできる）。"""
-    if key in _store:
-        return _store[key]
-    if default is MISSING:
-        raise KeyError(key)
-    return default
+@dataclass
+class User:
+    name: str
+    nickname: str | None = None
+
+
+def update_profile(user: User, name: str | KEEP = KEEP, nickname: str | None | KEEP = KEEP) -> None:
+    """渡された項目だけを書き換える。"""
+    if name is not KEEP:
+        user.name = name
+    if nickname is not KEEP:
+        user.nickname = nickname  # None なら「ニックネームなし」にする
 
 
 def main() -> None:
-    print("get('nickname')           →", get("nickname"))
-    print("get('age', None)          →", get("age", None))
-    try:
-        get("age")
-    except KeyError as e:
-        print("get('age')                → KeyError", e)
+    user = User("飛騨太郎", "ひだ")
 
-    # 以前の定番 `MISSING = object()` との違い
+    update_profile(user, name="飛騨次郎")
+    print("名前だけ変更        →", user)  # ニックネームは「ひだ」のまま
+
+    update_profile(user, nickname=None)
+    print("ニックネームを消す  →", user)
+
+    # 以前の定番 `KEEP = object()` との違い
     old = object()
     print()
-    print("repr  : object() →", repr(old), "/ sentinel →", repr(MISSING))
-    print("copy  : 同一性を保つ?", copy.deepcopy(MISSING) is MISSING)
-    print("pickle: 同一性を保つ?", pickle.loads(pickle.dumps(MISSING)) is MISSING)
+    print("repr  : object() →", repr(old), "/ sentinel →", repr(KEEP))
+    print("copy  : 同一性を保つ?", copy.deepcopy(KEEP) is KEEP)
+    print("pickle: 同一性を保つ?", pickle.loads(pickle.dumps(KEEP)) is KEEP)  # 自分で作ったデータのみ
 
 
 if __name__ == "__main__":
