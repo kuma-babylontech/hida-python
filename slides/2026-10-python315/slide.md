@@ -28,7 +28,7 @@ author: "kuma"
 6. AIと一緒に3.15を使うとき
 
 > デモコードは `demo/2026-10-python315/` にあります。
-> 数字はすべて手元のMacBook（Apple Silicon）で実行した結果です
+> 実測の数字は、手元のMacBook（Apple Silicon）で実行した結果です（「公式の数字」と書いたもの、フレームグラフを除く）
 
 ---
 
@@ -61,11 +61,11 @@ author: "kuma"
 | 内包表記の `*` | 入れ子のリストを1つのリストにまとめる処理を短く書ける |
 | UTF-8がデフォルト | WindowsとMacで、ファイルの読み書きの結果がそろう |
 | Tachyon | 動いているプログラムの遅い場所を外から調べる道具 |
-| JIT | よく実行される部分を、実行中に機械語へ変えて速くする仕組み |
+| JIT（改良） | よく実行される部分を、実行中に機械語へ変えて速くする仕組み。3.13からあり、3.15で速くなった |
 
 --
 
-### サポート中のバージョン（2026年10月時点）
+### 各バージョンのサポート期限（2026年10月時点）
 
 | バージョン | リリース | サポート終了 | 状態 |
 |---|---|---|---|
@@ -108,7 +108,7 @@ author: "kuma"
 | 3.12 | **型ヒントの書き方**が簡単に（`type` 文・`def f[T]()`） |
 | 3.13 | 対話モード（REPL）が新しく・**GILなし版**とJITが試験的に登場 |
 | 3.14 | **t-string**（安全に文字列を組み立てる）・GILなし版が正式サポート |
-| 3.15 | **lazy import**・frozendict・UTF-8・**JITが実用レベル**へ |
+| 3.15 | **lazy import**・frozendict・UTF-8・**JITがさらに速く**（まだ試験的） |
 
 GIL：同時に1つのスレッドだけがPythonのコードを実行できるようにする仕組み（4章で詳しく説明）
 
@@ -191,7 +191,7 @@ s += x * 2   は、5つの命令に分かれる（3.15の dis モジュールで
 PYTHON_JIT=1 python3.15 my_script.py   # JIT はまだ試験的な扱いで、既定ではオフ
 ```
 
-公式の数字：Linuxで7〜8%、macOSで11〜12%速い（平均）
+公式の数字：Linuxで7〜8%、macOSで11〜12%速い（いろいろな処理の平均。今回は計算の多い処理を測ったので、効果が大きく出た）
 
 ---
 
@@ -436,7 +436,7 @@ rows = [[1, 2], [3], [4, 5]]        # これを [1, 2, 3, 4, 5] にしたい
 
 **うれしいこと**
 
-- Macで書いたコードが、Windowsで `UnicodeDecodeError` になることがなくなる
+- UTF-8のファイルを読むコードが、Windowsで `UnicodeDecodeError` になることがなくなる
 - `encoding=` を書き忘れても、どのOSでも同じ結果になる
 
 --
@@ -494,7 +494,7 @@ python -m profiling.sampling attach --live 1234
 
 ![Tachyon のフレームグラフ](assets/tachyon-flamegraph.png)
 
-横幅が長いほど時間を使っている。`slow_word_count` が全体の約7割で、行番号まで分かる
+横幅が長いほど時間を使っている。`slow_word_count` が全体の約7割で、行番号まで分かる（図はLinuxのDockerで作成）
 
 --
 
@@ -540,7 +540,7 @@ GIL なし      0.38 秒    0.44 秒   ← ほぼ同時に進んでいる
 
 - **メリット**：重い計算をスレッドに分けると、CPUのコアを同時に使えて速くなる（今回は約3倍）
 - 注意：1スレッドだけだと少し遅い（0.34秒→0.38秒）
-- GILなし版は `python3.15t` として、通常版とは別に入れる
+- GILなし版は、通常版とは別の `python3.15t` というコマンドで動かす（uvなら `uv python install 3.15t`）
 
 --
 
@@ -656,7 +656,7 @@ lazyにするのは、起動時間など効果を測れた箇所に絞る
 |---|---|---|
 | 起動を速くする | importを関数の中に移す | 先頭で `lazy import` |
 | 書き換えられない辞書 | `MappingProxyType`（キーにできない） | `frozendict` |
-| 「省略された」の目印 | `object()`（表示が読みにくい） | `sentinel("MISSING")` |
+| 「渡されなかった」の目印 | `object()`（表示が読みにくい） | `sentinel("KEEP")` |
 | 入れ子のリストを1つにまとめる | `[x for row in rows for x in row]` | `[*row for row in rows]` |
 | ファイルの文字コード | OSごとに違う | どこでもUTF-8 |
 | 遅い場所を探す | cProfile（遅くなる・後から接続できない） | Tachyon |
@@ -686,6 +686,8 @@ lazyにするのは、起動時間など効果を測れた箇所に絞る
 - [PEP 798 – Unpacking in Comprehensions](https://peps.python.org/pep-0798/)
 - [PEP 686 – Make UTF-8 mode default](https://peps.python.org/pep-0686/)
 - [PEP 799 – A dedicated profiling package](https://peps.python.org/pep-0799/)
+- [PEP 744 – JIT Compilation](https://peps.python.org/pep-0744/)
+- [PEP 703 – Making the Global Interpreter Lock Optional in CPython](https://peps.python.org/pep-0703/)
 
 ---
 
