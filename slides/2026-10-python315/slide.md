@@ -21,7 +21,7 @@ author: "kuma"
 ## 今日の話
 
 1. Python 3.15ってどんなリリース？
-2. 3.10→3.15で何が変わった？（実測）
+2. 3.10→3.15で何が変わった？
 3. 3.15の目玉機能（これまでとの比較つき）
 4. 開発体験の改善
 5. アップグレードの注意点
@@ -45,20 +45,20 @@ author: "kuma"
 | バグ修正サポート | 約2年（2028年10月ごろまで） |
 | セキュリティサポート | 5年（2031年10月まで） |
 
-毎年10月に新バージョンが出るリズムは、3.9から変わらず
+新バージョンが出るタイミングは、3.9から毎年10月で変わらない
 
 --
 
-### 3.15を一言でいうと
+### 3.15の主な新機能
 
 毎日書くコードが**少しずつ楽になる**リリース
 
-| 新機能 | ひとことで |
+| 新機能 | 概要 |
 |---|---|
 | lazy import | 使うときまでモジュールを読み込まない。起動が速くなる |
 | frozendict | 書き換えられない辞書（dict） |
 | sentinel | 「値が渡されなかった」を表す専用の目印 |
-| 内包表記の `*` | リストのリストを1行で平らにできる |
+| 内包表記の `*` | 入れ子のリストを1つのリストにまとめる処理を短く書ける |
 | UTF-8がデフォルト | WindowsとMacで、ファイルの読み書きの結果がそろう |
 | Tachyon | 動いているプログラムの遅い場所を外から調べる道具 |
 | JIT | よく実行される部分を、実行中に機械語へ変えて速くする仕組み |
@@ -84,7 +84,7 @@ author: "kuma"
 
 ---
 
-### 毎年増えてきた機能（実際に動かして確認）
+### 毎年増えてきた機能
 
 | 機能 | 追加 | 3.10 | 3.11 | 3.12 | 3.13 | 3.14 | 3.15 |
 |---|---|---|---|---|---|---|---|
@@ -102,7 +102,7 @@ author: "kuma"
 
 ### 各バージョンのテーマ
 
-| バージョン | ひとことで |
+| バージョン | 概要 |
 |---|---|
 | 3.11 | **速くなった**（Faster CPython）・エラーの場所を詳しく表示 |
 | 3.12 | **型ヒントの書き方**が簡単に（`type` 文・`def f[T]()`） |
@@ -110,15 +110,28 @@ author: "kuma"
 | 3.14 | **t-string**（安全に文字列を組み立てる）・GILなし版が正式サポート |
 | 3.15 | **lazy import**・frozendict・UTF-8・**JITが実用レベル**へ |
 
-GIL：同時に1つのスレッドだけがPythonのコードを実行できるようにする仕組み。外すと複数のCPUコアを同時に使える
+GIL：同時に1つのスレッドだけがPythonのコードを実行できるようにする仕組み（4章で詳しく説明）
 
 --
 
-### 速さはどう変わった？（実測）
+### 速さの比較に使った4つの処理
 
-同じ純Pythonのコードを5回ずつ実行（秒・中央値。小さいほど速い）
+外部ライブラリを使わない、Pythonだけの処理（`bench_workload.py`）
 
-| バージョン | nbody | primes | objects | strings | 合計 | 3.10比 |
+| 処理 | 何をしているか | 似ている場面 |
+|---|---|---|
+| 小数の計算 | 3つの天体の動きを、小数の掛け算・割り算で24万回計算する | 数値シミュレーション |
+| 整数の計算 | 40万までの数が素数かどうかを、割り算で1つずつ調べる | ループと条件分岐が多い処理 |
+| オブジェクト操作 | クラスのインスタンスを240万回作り、メソッドを呼ぶ | クラスを使ったふつうのアプリ |
+| 文字列処理 | 文字列を80万回作って大文字に変え、辞書で数える | ログやCSVの集計 |
+
+--
+
+### 速さはどう変わった？
+
+手元のMacで5回ずつ実行（秒・中央値。小さいほど速い）
+
+| バージョン | 小数の計算 | 整数の計算 | オブジェクト操作 | 文字列処理 | 合計 | 3.10比 |
 |---|---|---|---|---|---|---|
 | 3.10 | 0.674 | 1.156 | 0.684 | 0.198 | 2.712 | 1.00x |
 | 3.11 | 0.489 | 0.721 | 0.474 | 0.157 | 1.840 | **1.47x** |
@@ -128,18 +141,14 @@ GIL：同時に1つのスレッドだけがPythonのコードを実行できる�
 | 3.15 | 0.437 | 0.664 | 0.347 | 0.175 | 1.622 | **1.67x** |
 | **3.15 + JIT** | 0.305 | 0.376 | 0.327 | 0.157 | 1.166 | **2.33x** |
 
-macOS / Apple Silicon、uv管理のCPythonビルドで計測（`bench_workload.py`）
-
 --
 
-### 速さの読み方
+### 速さの比較結果
 
 - **3.11で一気に1.5倍**。それ以降、インタプリタ単体の速さは少しずつ伸びている
-- 3.13は `primes`（整数のwhileループ）だけ遅かった
-  - このビルドで何度測っても再現。原因までは追えていません
 - **3.15でJITを有効にすると、さらに1.4倍**
   - JIT：よく実行される部分を、実行中に機械語へ変換して速くする仕組み
-  - 数値計算のループ（nbody・primes）で速くなる。文字列処理（strings）はほぼ変わらない
+  - 小数や整数の計算で速くなる。文字列処理はほぼ変わらない
 
 ```bash
 PYTHON_JIT=1 python3.15 my_script.py   # JIT はまだ既定でオフ
@@ -193,7 +202,7 @@ lazy import csv
 
 --
 
-### lazy importの効果（実測）
+### lazy importの効果
 
 重いモジュールを8個importするCLIで `--help` だけ実行
 
@@ -247,8 +256,9 @@ True
 {frozendict({'x': 1, 'y': 2}): 'OK'}
 ```
 
-- ハッシュ：値から計算する番号。これが計算できる値だけが、辞書のキーや `set` の要素になれる
-- 書き換えられないので、frozendictはハッシュを計算できる
+- ハッシュ：値の中身から計算する「整理番号」。辞書は、キーの整理番号を手がかりに値をすばやく探す
+- 中身が後から変わると番号も変わって探せなくなるので、書き換えられる `dict` や `list` は辞書のキーにできない
+- frozendictは書き換えられないので、整理番号を計算でき、辞書のキーや `set` の要素にできる
 
 --
 
@@ -259,7 +269,7 @@ True
 | 中身を書き換える | できる | 直接はできない | できない |
 | 元の辞書の変更が反映される | − | **反映されてしまう** | − |
 | 辞書のキーや `set` に入れる | できない | できない | **できる** |
-| `@functools.cache` の引数にする | できない | できない | **できる** |
+| `@cache`（計算結果を覚える）の引数 | できない | できない | **できる** |
 
 **うれしいこと**
 
@@ -272,24 +282,45 @@ True
 
 ### frozendictの使いどころ
 
+**1. 書き換えてはいけない設定値**
+
 ```python
-import functools, json
-
-# json に array_hook が増えたので、中までまるごと書き換え不可にして読める
-config = json.loads(text, object_hook=frozendict, array_hook=tuple)
-# frozendict({'db': frozendict({'host': 'localhost', 'port': 5432}),
-#             'features': ('search', 'export')})
-
-@functools.cache                  # 結果を覚えておき、同じ引数なら計算を省く
-def connection_string(db: frozendict) -> str:
-    return f"postgresql://{db['host']}:{db['port']}"
-
-connection_string(config["db"])   # dict だとエラー。frozendict なら OK
+DEFAULT_CONFIG = frozendict(host="localhost", port=5432)
+DEFAULT_CONFIG["port"] = 3306    # TypeError：うっかり書き換えてもすぐ気づける
 ```
 
-- `dict` の仲間（サブクラス）ではないので、型を調べるときは `Mapping` を使う
+**2.「組み合わせ」ごとに数える**
 
-（`02_frozendict.py`）
+```python
+from collections import Counter
+
+sales = Counter()                                # 種類ごとに数を数える辞書
+sales[frozendict(color="red", size="M")] += 1
+sales[frozendict(size="M", color="red")] += 1    # 順番が違っても同じ組み合わせ
+print(sales)
+# Counter({frozendict({'color': 'red', 'size': 'M'}): 2})
+```
+
+ふつうの `dict` では、どちらもキーにできずエラーになる
+
+--
+
+### frozendictを受け取る関数を書くときの注意
+
+frozendictは `dict` とは別の型として作られている
+
+```python
+isinstance({"a": 1}, dict)               # True
+isinstance(frozendict(a=1), dict)        # False：dict ではないと判定される
+
+from collections.abc import Mapping
+isinstance(frozendict(a=1), Mapping)     # True
+isinstance({"a": 1}, Mapping)            # True
+```
+
+- `isinstance(x, dict)` で辞書かどうかを調べているコードは、frozendictを辞書ではないと判断する
+- `Mapping` は「キーを指定して値を読める型」をまとめた呼び名。`dict` もfrozendictもこれに当てはまる
+- 辞書とfrozendictのどちらも受け取りたいときは、`Mapping` で調べる
 
 --
 
@@ -297,38 +328,39 @@ connection_string(config["db"])   # dict だとエラー。frozendict なら OK
 
 番兵（sentinel）：「値が渡されなかった」ことを表す専用の目印
 
-```python
-# よくある書き方：省略されたら None
-def get(key, default=None):
-    ...
+例：プロフィールの更新。渡された項目だけを書き換えたい
 
-get("age")          # 省略された
-get("age", None)    # None を渡した
-# → 関数の中からは、どちらも default が None に見えて区別できない
+```python
+def update_profile(user, nickname=None):
+    user.nickname = nickname   # 省略されたときも None で上書きしてしまう
+
+update_profile(user)                  # ニックネームは「変えない」つもり
+update_profile(user, nickname=None)   # ニックネームを「消したい」
+# → 関数の中では、どちらも nickname が None で区別できない
 ```
 
-「省略されたらエラーにしたい。でも `None` を既定値として渡すのは許したい」ときに困る
+「渡さなければ変えない」「`None` なら消す」を両立できない
 
 --
 
 ### sentinel：これまでとの違い
 
 ```python
-MISSING = sentinel("MISSING")       # 3.15
+KEEP = sentinel("KEEP")               # 3.15：「渡されなかった」の目印
 
-def get(key, default=MISSING):
-    if key in store:
-        return store[key]
-    if default is MISSING:          # 省略されたときだけエラー
-        raise KeyError(key)
-    return default                  # None を既定値に指定できる
+def update_profile(user, nickname=KEEP):
+    if nickname is not KEEP:          # 渡されたときだけ書き換える
+        user.nickname = nickname      # None なら「ニックネームなし」にする
+
+update_profile(user)                  # 変わらない
+update_profile(user, nickname=None)   # 消える
 ```
 
 | | `object()`（これまでの定番） | `sentinel()` |
 |---|---|---|
-| 表示（エラー時など） | `<object object at 0x...>` | `MISSING` |
+| 表示（エラー時など） | `<object object at 0x...>` | `KEEP` |
 | コピー後も同じもの？ | × 別物になる | ○ |
-| 型ヒント | 書きにくい | `int \| MISSING` |
+| 型ヒント | 書きにくい | `str \| None \| KEEP` |
 
 **うれしいこと**：エラー表示が読みやすく、コピーしても目印のまま使える
 
@@ -338,19 +370,21 @@ def get(key, default=MISSING):
 
 内包表記：`[x * 2 for x in nums]` のように、リストを1行で作る書き方
 
+やりたいこと：入れ子のリストを、1つのリストにまとめる
+
 ```python
-rows = [[1, 2], [3], [4, 5]]
+rows = [[1, 2], [3], [4, 5]]        # これを [1, 2, 3, 4, 5] にしたい
 
 # これまで：for が2つ。どちらを先に書くか毎回迷う
 [x for row in rows for x in row]
 
-# 3.15：「row の中身を広げて並べる」と、そのまま読める
+# 3.15：* は「中身を取り出して並べる」記号。row の中身を並べる、と読める
 [*row for row in rows]              # [1, 2, 3, 4, 5]
 {*s for s in sets}                  # 集合をまとめる
 {**d for d in dicts}                # 辞書をまとめる（同じキーは後が勝つ）
 ```
 
-**うれしいこと**：`f(*args)` と同じ `*` で、リスト・集合・辞書をそろえて書ける
+**うれしいこと**：`f(*args)` と同じ `*` で、リスト・集合・辞書を同じ形で書ける
 
 --
 
@@ -392,7 +426,7 @@ open("memo.txt", encoding="utf-8")      # 3.14 以前でも同じ結果にした
 
 ### Tachyon：新しいプロファイラ（PEP 799）
 
-プロファイラ：プログラムのどこに時間がかかっているかを調べる道具
+プロファイラ：プログラムのどの関数・どの行に時間がかかっているかを測る道具。「なぜ遅いのか」を勘ではなく数字で調べられる
 
 | | cProfile（これまで） | Tachyon（3.15） |
 |---|---|---|
@@ -474,9 +508,24 @@ docker run --rm -v "$PWD":/work -w /work python:3.15-slim \
 
 --
 
-### GILなし版（free-threading）の続報
+### GILとは？GILなし版（free-threading）のメリット
 
-GILを外したPython。複数のスレッドが本当に同時に動くので、複数のCPUコアを同時に使える
+GIL：同時に1つのスレッドしかPythonのコードを実行できない仕組み。スレッドを増やしても、計算は1つずつしか進まない
+
+```text
+同じ計算を4つのスレッドに分けて実行（07_free_threading.py）
+               1回分     4スレッドで4回分
+GIL あり      0.34 秒    1.38 秒   ← 4倍かかる（1つずつ進んでいる）
+GIL なし      0.38 秒    0.44 秒   ← ほぼ同時に進んでいる
+```
+
+- **メリット**：重い計算をスレッドに分けると、CPUのコアを同時に使えて速くなる（今回は約3倍）
+- 注意：1スレッドだけだと少し遅い（0.34秒→0.38秒）
+- GILなし版は `python3.15t` として、通常版とは別に入れる
+
+--
+
+### GILなし版：3.15での進展
 
 | | 3.13 | 3.14 | 3.15 |
 |---|---|---|---|
@@ -589,7 +638,7 @@ lazyにするのは、起動時間など効果を測れた箇所に絞る
 | 起動を速くする | importを関数の中に移す | 先頭で `lazy import` |
 | 書き換えられない辞書 | `MappingProxyType`（キーにできない） | `frozendict` |
 | 「省略された」の目印 | `object()`（表示が読みにくい） | `sentinel("MISSING")` |
-| リストを平らにする | `[x for row in rows for x in row]` | `[*row for row in rows]` |
+| 入れ子のリストを1つにまとめる | `[x for row in rows for x in row]` | `[*row for row in rows]` |
 | ファイルの文字コード | OSごとに違う | どこでもUTF-8 |
 | 遅い場所を探す | cProfile（遅くなる・後から接続できない） | Tachyon |
 

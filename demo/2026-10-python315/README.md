@@ -6,6 +6,7 @@
 
 ```bash
 uv python install 3.10 3.11 3.12 3.13 3.14 3.15   # 06 の比較に使う
+uv python install 3.15t                          # 07 の GIL なし版
 uv venv -p 3.15 .venv && uv pip install -p .venv -r requirements.txt
 ```
 
@@ -17,10 +18,11 @@ uvが古いと3.15の正式版が見つからず、alpha版が入る。`uv self 
 |---|---|
 | `01_lazy_imports.py` | lazy import（PEP 810）でCLIの起動時間とモジュール数を比較 |
 | `02_frozendict.py` | frozendict（PEP 814）。JSONを中まで不変で読む・`@cache` の引数に使う |
-| `03_sentinel.py` | sentinel（PEP 661）で「未指定」と `None` を区別 |
+| `03_sentinel.py` | sentinel（PEP 661）。プロフィール更新で「渡さない＝変えない」と「`None`＝消す」を区別 |
 | `04_small_changes.py` | 内包表記の `*`・UTF-8デフォルト・エラーメッセージ・`re.prefixmatch` など |
 | `05_profile_target.py` | Tachyon（PEP 799）でプロファイルするための重い処理 |
 | `06_compare_versions.py` | 3.10〜3.15で機能の有無と速度を比較（3.15はJITあり/なし）。結果は `output/compare.md` |
+| `07_free_threading.py` | 同じ計算を4スレッドで実行し、GILあり（`python3.15`）となし（`python3.15t`）を比べる |
 
 ```bash
 .venv/bin/python 01_lazy_imports.py

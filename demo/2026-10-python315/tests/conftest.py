@@ -36,5 +36,10 @@ def small_mod():
 
 
 @pytest.fixture(scope="session")
+def free_threading_mod():
+    return _load("free_threading", "07_free_threading.py")
+
+
+@pytest.fixture(scope="session")
 def compare_mod():
     return _load("compare_versions", "06_compare_versions.py")

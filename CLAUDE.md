@@ -198,7 +198,7 @@ Tailwind CSS **v4**（`@tailwindcss/vite` プラグイン）を使用。`tailwin
   - **uv が古いと `uv python install 3.15` で alpha 版（3.15.0a7）が入る**。正式版は新しい uv が要る（`uv self update`、または `uvx --from uv uv python install 3.15.0`）
   - 速度比較（`06_compare_versions.py`）は `uv python find --managed-python` で**uv 管理のビルドに揃えている**。Homebrew 版が混ざるとビルド条件が違い比較が歪む
   - **Tachyon（`python -m profiling.sampling`）は macOS だと sudo が要る**（`Permission Error: Unable to access process memory`）。スライドのフレームグラフは `python:3.15-slim` の Docker で作った
-  - スライドの速度表・lazy import の起動時間は手元 Mac の実測。再計測したら表も差し替える
+  - スライドの速度表・lazy import の起動時間・GIL あり/なしの比較（`07_free_threading.py`。`python3.15t` は `uv python install 3.15t`）は手元 Mac の実測。再計測したら表も差し替える
 
 ## コーディング規約
 

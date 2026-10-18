@@ -37,16 +37,18 @@ def test_connection_string_is_cached(frozendict_mod):
     assert frozendict_mod.connection_string.cache_info().hits == 1
 
 
-def test_get_distinguishes_missing_from_none(sentinel_mod):
-    assert sentinel_mod.get("nickname") is None
-    assert sentinel_mod.get("age", None) is None
-    with pytest.raises(KeyError):
-        sentinel_mod.get("age")
+def test_update_profile_distinguishes_omitted_from_none(sentinel_mod):
+    user = sentinel_mod.User("a", "nick")
+    sentinel_mod.update_profile(user, name="b")
+    assert user.nickname == "nick"  # 渡さなければ変えない
+    sentinel_mod.update_profile(user, nickname=None)
+    assert user.nickname is None  # None を渡せば消す
+    assert user.name == "b"
 
 
 def test_sentinel_survives_copy_and_pickle(sentinel_mod):
-    m = sentinel_mod.MISSING
-    assert repr(m) == "MISSING"
+    m = sentinel_mod.KEEP
+    assert repr(m) == "KEEP"
     assert copy.deepcopy(m) is m
     assert pickle.loads(pickle.dumps(m)) is m
 
@@ -54,6 +56,10 @@ def test_sentinel_survives_copy_and_pickle(sentinel_mod):
 def test_comprehension_unpacking(small_mod):
     assert small_mod.flatten([[1, 2], [], [3]]) == [1, 2, 3]
     assert small_mod.merge_all([{"a": 1}, {"b": 2}, {"a": 3}]) == {"a": 3, "b": 2}
+
+
+def test_count_primes(free_threading_mod):
+    assert free_threading_mod.count_primes(30) == 10  # 2,3,5,7,11,13,17,19,23,29
 
 
 def test_utf8_mode_is_default():
