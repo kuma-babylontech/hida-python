@@ -147,14 +147,51 @@ GIL：同時に1つのスレッドだけがPythonのコードを実行できる�
 
 - **3.11で一気に1.5倍**。それ以降、インタプリタ単体の速さは少しずつ伸びている
 - **3.15でJITを有効にすると、さらに1.4倍**
-  - JIT：よく実行される部分を、実行中に機械語へ変換して速くする仕組み
   - 小数や整数の計算で速くなる。文字列処理はほぼ変わらない
+  - JITが何かは、次のページで説明
 
-```bash
-PYTHON_JIT=1 python3.15 my_script.py   # JIT はまだ既定でオフ
+--
+
+### JITとは？
+
+Pythonのコードは、まず「バイトコード」という命令に変換されてから実行される
+
+```text
+s += x * 2   は、5つの命令に分かれる（3.15の dis モジュールで表示）
+  LOAD_FAST_BORROW_LOAD_FAST_BORROW (s, x)   # s と x を取り出す
+  LOAD_SMALL_INT   2                         # 2 を用意する
+  BINARY_OP        (*)                       # 掛け算
+  BINARY_OP        (+=)                      # 足し算
+  STORE_FAST       s                         # 結果を s にしまう
 ```
 
-公式の数字：x86-64 Linuxで7〜8%、macOS（AArch64）で11〜12%の高速化（幾何平均）
+| | ふだん（インタプリタ） | JITを有効にしたとき |
+|---|---|---|
+| しくみ | 命令を1つずつ読んで、そのつど実行する | 何度も実行される部分を、まとめて機械語に変換して実行する |
+| 速さ | ループで同じ命令を何度も読み直すぶん、時間がかかる | 読み直す手間が減るので速くなる |
+
+機械語：CPUがそのまま実行できる命令。JITは「Just-In-Time（実行中に、必要になったときに）」の略
+
+--
+
+### JITで速くなる処理・変わらない処理
+
+**速くなりやすい**
+
+- 小数や整数の計算を何度も繰り返すループ（今回1.4〜1.8倍）
+
+**あまり変わらない**
+
+- 文字列処理・オブジェクト操作（今回約1.1倍）
+- 1回しか通らない処理（何度も実行される部分だけが変換されるため）
+- ファイルやネットワークの待ち時間
+- numpyなど、C言語で書かれた部分（もともと機械語で動く）
+
+```bash
+PYTHON_JIT=1 python3.15 my_script.py   # JIT はまだ試験的な扱いで、既定ではオフ
+```
+
+公式の数字：Linuxで7〜8%、macOSで11〜12%速い（平均）
 
 ---
 
@@ -458,24 +495,6 @@ python -m profiling.sampling attach --live 1234
 ![Tachyon のフレームグラフ](assets/tachyon-flamegraph.png)
 
 横幅が長いほど時間を使っている。`slow_word_count` が全体の約7割で、行番号まで分かる
-
---
-
-### Tachyonの落とし穴：macOSではsudoが要る
-
-```text
-🔒 Permission Error: Unable to access process memory on macOS
-Tachyon needs elevated permissions to profile processes.
-```
-
-- 他プロセスのメモリを読む仕組みなので、**macOSでは `sudo`（管理者権限）が必要**
-- 今回はLinuxのDockerコンテナ（rootで実行）で計測した
-
-```bash
-# 今回は Docker で計測
-docker run --rm -v "$PWD":/work -w /work python:3.15-slim \
-  python -m profiling.sampling run --flamegraph -o output/flame.html 05_profile_target.py
-```
 
 --
 
