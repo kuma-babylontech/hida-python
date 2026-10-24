@@ -3,3 +3,4 @@ matplotlib
 seaborn
 japanize-matplotlib
 requests
+setuptools  # japanize-matplotlib が distutils を使う（Python 3.12 以降は同梱されない）
